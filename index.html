@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Research Storage Calculator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        .storage-calculator {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .main-container {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 30px;
+            align-items: start;
+        }
+
+        @media (max-width: 1024px) {
+            .main-container {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+        }
+
+        .calculator-panel {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+        }
+
+        .results-panel {
+            position: sticky;
+            top: 20px;
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .section-header h2 {
+            font-size: 1.5em;
+            color: #2c3e50;
+            font-weight: 600;
+        }
+
+        .section-header .icon {
+            font-size: 1.5em;
+        }
+
+        .file-categories {
+            display: grid;
+            gap: 25px;
+        }
+
+        .category {
+            background: #f8f9fa;
+            border-radius: 16px;
+            padding: 20px;
+            border-left: 4px solid;
+            transition: all 0.3s ease;
+        }
+
+        .category:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
+
+        .category.audio { border-left-color: #e74c3c; }
+        .category.documents { border-left-color: #3498db; }
+        .category.visual { border-left-color: #9b59b6; }
+        .category.data { border-left-color: #27ae60; }
+        .category.specialized { border-left-color: #f39c12; }
+
+        .category-title {
+            font-size: 1.2em;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .file-inputs {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 15px;
+        }
+
+        .input-group {
+            background: white;
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+        }
+
+        .input-group:hover {
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+
+        .input-group.has-options {
+            padding-bottom: 5px;
+        }
+
+        .input-label {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 4px;
+            font-size: 0.95em;
+        }
+
+        .input-description {
+            font-size: 0.8em;
+            color: #7f8c8d;
+            margin-bottom: 8px;
+        }
+
+        .input-field {
+            position: relative;
+            margin-bottom: 10px;
+        }
+
+        .input-field input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: #fff;
+        }
+
+        .input-field input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .input-field input:not([value="0"]):not([value=""]) {
+            border-color: #27ae60;
+            background: #f8fff8;
+        }
+
+        .format-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 6px;
+            margin-bottom: 8px;
+        }
+
+        .format-btn {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            padding: 6px 10px;
+            text-align: center;
+            cursor: pointer;
+            font-size: 0.8em;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .format-btn:hover {
+            background: #e9ecef;
+        }
+
+        .format-btn.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .duration-control {
+            margin-bottom: 10px;
+        }
+
+        .duration-control label {
+            font-size: 0.85em;
+            color: #6c757d;
+            margin-bottom: 4px;
+            display: block;
+        }
+
+        .duration-control input[type="range"] {
+            width: 100%;
+            margin-bottom: 4px;
+        }
+
+        .duration-display {
+            text-align: center;
+            font-size: 0.8em;
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .multiplier-section {
+            background: linear-gradient(135deg, #ffeaa7 0%, #fab1a0 100%);
+            border-radius: 16px;
+            padding: 25px;
+            margin: 25px 0;
+        }
+
+        .multiplier-section h3 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 1.3em;
+        }
+
+        .multiplier-section p {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            opacity: 0.8;
+        }
+
+        .multiplier-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 12px;
+        }
+
+        .multiplier-btn {
+            background: white;
+            border: 2px solid #ddd;
+            border-radius: 12px;
+            padding: 15px 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            font-size: 0.9em;
+        }
+
+        .multiplier-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+
+        .multiplier-btn.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .multiplier-btn .main-text {
+            display: block;
+            font-size: 1em;
+        }
+
+        .multiplier-btn .sub-text {
+            display: block;
+            font-size: 0.75em;
+            opacity: 0.7;
+            margin-top: 4px;
+        }
+
+        .results-header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .results-header h2 {
+            color: #2c3e50;
+            font-size: 1.8em;
+            margin-bottom: 8px;
+        }
+
+        .primary-result {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-align: center;
+            padding: 25px;
+            border-radius: 16px;
+            margin-bottom: 20px;
+        }
+
+        .primary-result .label {
+            font-size: 0.9em;
+            opacity: 0.9;
+            margin-bottom: 5px;
+        }
+
+        .primary-result .value {
+            font-size: 2.5em;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .secondary-results {
+            display: grid;
+            gap: 12px;
+        }
+
+        .result-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .result-item .label {
+            color: #6c757d;
+            font-size: 0.9em;
+        }
+
+        .result-item .value {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .warning-message {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 12px;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .warning-high {
+            background: #fff3cd;
+            color: #856404;
+            border: 2px solid #ffeaa7;
+        }
+
+        .warning-critical {
+            background: #f8d7da;
+            color: #721c24;
+            border: 2px solid #f5c6cb;
+        }
+
+        .reference-toggle {
+            background: rgba(255,255,255,0.9);
+            border: 2px solid #667eea;
+            color: #667eea;
+            padding: 12px 24px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            margin: 20px auto;
+            display: block;
+            transition: all 0.3s ease;
+        }
+
+        .reference-toggle:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .reference-table {
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 25px;
+            margin: 20px 0;
+            display: none;
+            overflow-x: auto;
+        }
+
+        .reference-table.show {
+            display: block;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .reference-table table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .reference-table th,
+        .reference-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .reference-table th {
+            background: #667eea;
+            color: white;
+            font-weight: 600;
+        }
+
+        .reference-table tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+
+        .progress-bar {
+            background: #e9ecef;
+            border-radius: 10px;
+            height: 8px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            height: 100%;
+            border-radius: 10px;
+            transition: width 0.5s ease;
+        }
+
+        @media (max-width: 768px) {
+            .storage-calculator {
+                padding: 15px;
+            }
+
+            .header h1 {
+                font-size: 2em;
+            }
+
+            .calculator-panel,
+            .results-panel {
+                padding: 20px;
+            }
+
+            .file-inputs {
+                grid-template-columns: 1fr;
+            }
+
+            .multiplier-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="storage-calculator">
+        <div class="header">
+            <h1>🗄️ Research Storage Calculator</h1>
+            <p>Precision storage planning with format-specific estimates, duration controls, and real-world compression ratios. Get accurate projections for your research data.</p>
+        </div>
+
+        <button class="reference-toggle" onclick="toggleReference()">
+            📊 View Detailed File Size Reference
+        </button>
+
+        <div id="reference-table" class="reference-table">
+            <h3>Comprehensive File Size Reference Guide</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Data Type</th>
+                        <th>Format/Quality</th>
+                        <th>Per Hour/Unit</th>
+                        <th>Compression Impact</th>
+                        <th>Research Notes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td rowspan="3"><strong>Audio</strong></td><td>WAV (44.1kHz/16-bit)</td><td>635 MB</td><td>None (uncompressed)</td><td>Standard research quality</td></tr>
+                    <tr><td>MP3 (320kbps)</td><td>144 MB</td><td>~78% smaller</td><td>High quality compressed</td></tr>
+                    <tr><td>WAV (96kHz/24-bit)</td><td>2.07 GB</td><td>None (uncompressed)</td><td>Audiophile/acoustic research</td></tr>
+                    
+                    <tr><td rowspan="4"><strong>Video</strong></td><td>1080p H.264 (medium)</td><td>3.6 GB</td><td>Standard compression</td><td>Most research applications</td></tr>
+                    <tr><td>1080p H.264 (high quality)</td><td>7.2 GB</td><td>Lower compression</td><td>Detailed behavioral analysis</td></tr>
+                    <tr><td>4K H.264 (medium)</td><td>14.4 GB</td><td>Standard compression</td><td>High-resolution documentation</td></tr>
+                    <tr><td>4K H.264 (high quality)</td><td>28.8 GB</td><td>Lower compression</td><td>Scientific/medical imaging</td></tr>
+                    
+                    <tr><td rowspan="3"><strong>Images</strong></td><td>RAW (24MP camera)</td><td>25-45 MB</td><td>None (uncompressed)</td><td>Professional research photos</td></tr>
+                    <tr><td>JPEG (high quality)</td><td>8-15 MB</td><td>~70% smaller</td><td>Standard documentation</td></tr>
+                    <tr><td>Microscopy TIFF</td><td>50-2000 MB</td><td>Varies by resolution</td><td>Scientific imaging varies widely</td></tr>
+                    
+                    <tr><td rowspan="4"><strong>Spreadsheets</strong></td><td>1K rows, basic data</td><td>150-500 KB</td><td>Text compresses well</td><td>Simple datasets</td></tr>
+                    <tr><td>1K rows, mixed data</td><td>1-3 MB</td><td>Complex formulas add size</td><td>Standard research data</td></tr>
+                    <tr><td>10K rows, basic data</td><td>5-15 MB</td><td>Linear scaling</td><td>Large datasets</td></tr>
+                    <tr><td>10K rows, complex</td><td>25-75 MB</td><td>Formulas/formatting heavy</td><td>Advanced analysis files</td></tr>
+                    
+                    <tr><td rowspan="2"><strong>Text</strong></td><td>Transcript (plain text)</td><td>50-150 KB/hour</td><td>Already minimal</td><td>Depends on speech density</td></tr>
+                    <tr><td>Interview (Word doc)</td><td>200-800 KB/hour</td><td>Formatting adds size</td><td>With timestamps/formatting</td></tr>
+                    
+                    <tr><td rowspan="3"><strong>Documents</strong></td><td>Academic PDF (text-heavy)</td><td>1-5 MB</td><td>Text compresses well</td><td>Typical journal articles</td></tr>
+                    <tr><td>Research PDF (with images)</td><td>5-25 MB</td><td>Images dominate size</td><td>Figures and charts</td></tr>
+                    <tr><td>Scan PDF (300 DPI)</td><td>50-200 MB</td><td>Image-based, large</td><td>Digitized documents</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="main-container">
+            <div class="calculator-panel">
+                <div class="section-header">
+                    <span class="icon">🧮</span>
+                    <h2>File Requirements</h2>
+                </div>
+
+                <div class="file-categories">
+                    <div class="category audio">
+                        <div class="category-title">🎵 Audio Files</div>
+                        <div class="file-inputs">
+                            <div class="input-group has-options">
+                                <div class="input-label">Audio Recordings</div>
+                                <div class="input-description">Choose format and set duration</div>
+                                <div class="format-options">
+                                    <div class="format-btn active" data-target="audio" data-size="635">WAV 16-bit</div>
+                                    <div class="format-btn" data-target="audio" data-size="144">MP3 320k</div>
+                                    <div class="format-btn" data-target="audio" data-size="2073">WAV 24-bit</div>
+                                </div>
+                                <div class="duration-control">
+                                    <label>Average Duration per Recording</label>
+                                    <input type="range" id="audio-duration" min="0.25" max="8" step="0.25" value="1">
+                                    <div class="duration-display" id="audio-duration-display">1.0 hours</div>
+                                </div>
+                                <div class="input-field">
+                                    <input type="number" id="audio" min="0" value="0" placeholder="Number of recordings">
+                                </div>
+                            </div>
+                            
+                            <div class="input-group">
+                                <div class="input-label">Transcripts</div>
+                                <div class="input-description">Plain text • ~100 KB per hour of audio</div>
+                                <div class="input-field">
+                                    <input type="number" id="transcripts" min="0" value="0" placeholder="Number of transcripts">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="category visual">
+                        <div class="category-title">📹 Video & Images</div>
+                        <div class="file-inputs">
+                            <div class="input-group has-options">
+                                <div class="input-label">Video Recordings</div>
+                                <div class="input-description">Select quality and duration</div>
+                                <div class="format-options">
+                                    <div class="format-btn active" data-target="video" data-size="3600">1080p Med</div>
+                                    <div class="format-btn" data-target="video" data-size="7200">1080p High</div>
+                                    <div class="format-btn" data-target="video" data-size="14400">4K Med</div>
+                                    <div class="format-btn" data-target="video" data-size="28800">4K High</div>
+                                </div>
+                                <div class="duration-control">
+                                    <label>Average Duration per Recording</label>
+                                    <input type="range" id="video-duration" min="0.25" max="4" step="0.25" value="1">
+                                    <div class="duration-display" id="video-duration-display">1.0 hours</div>
+                                </div>
+                                <div class="input-field">
+                                    <input type="number" id="video" min="0" value="0" placeholder="Number of recordings">
+                                </div>
+                            </div>
+                            
+                            <div class="input-group has-options">
+                                <div class="input-label">Research Photos</div>
+                                <div class="input-description">Choose format and image type</div>
+                                <div class="format-options">
+                                    <div class="format-btn active" data-target="photos" data-size="12">JPEG High</div>
+                                    <div class="format-btn" data-target="photos" data-size="35">RAW Standard</div>
+                                    <div class="format-btn" data-target="photos" data-size="300">Microscopy</div>
+                                </div>
+                                <div class="input-field">
+                                    <input type="number" id="photos" min="0" value="0" placeholder="Number of images">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="category data">
+                        <div class="category-title">📊 Data & Spreadsheets</div>
+                        <div class="file-inputs">
+                            <div class="input-group has-options">
+                                <div class="input-label">Excel/CSV Files</div>
+                                <div class="input-description">Select data complexity</div>
+                                <div class="format-options">
+                                    <div class="format-btn active" data-target="excel" data-size="0.3">1K Basic</div>
+                                    <div class="format-btn" data-target="excel" data-size="2">1K Mixed</div>
+                                    <div class="format-btn" data-target="excel" data-size="10">10K Basic</div>
+                                    <div class="format-btn" data-target="excel" data-size="50">10K Complex</div>
+                                </div>
+                                <div class="input-field">
+                                    <input type="number" id="excel" min="0" value="0" placeholder="Number of files">
+                                </div>
+                            </div>
+                            
+                            <div class="input-group">
+                                <div class="input-label">Survey Data Files</div>
+                                <div class="input-description">Typical survey export • ~2 MB per 1000 responses</div>
+                                <div class="input-field">
+                                    <input type="number" id="survey" min="0" value="0" placeholder="Number of surveys">
+                                </div>
+                            </div>
+                            
+                            <div class="input-group">
+                                <div class="input-label">Database Exports</div>
+                                <div class="input-description">SQL/CSV exports • ~20 MB per 1000 records</div>
+                                <div class="input-field">
+                                    <input type="number" id="database" min="0" value="0" placeholder="Number of exports">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="category documents">
+                        <div class="category-title">📄 Documents</div>
+                        <div class="file-inputs">
+                            <div class="input-group has-options">
+                                <div class="input-label">PDF Documents</div>
+                                <div class="input-description">Select document type</div>
+                                <div class="format-options">
+                                    <div class="format-btn active" data-target="pdfs" data-size="3">Text Heavy</div>
+                                    <div class="format-btn" data-target="pdfs" data-size="12">With Images</div>
+                                    <div class="format-btn" data-target="pdfs" data-size="120">Scanned Docs</div>
+                                </div>
+                                <div class="input-field">
+                                    <input type="number" id="pdfs" min="0" value="0" placeholder="Number of PDFs">
+                                </div>
+                            </div>
+                            
+                            <div class="input-group">
+                                <div class="input-label">Word Documents</div>
+                                <div class="input-description">Research papers/reports • ~2 MB average</div>
+                                <div class="input-field">
+                                    <input type="number" id="word-docs" min="0" value="0" placeholder="Number of documents">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="category specialized">
+                        <div class="category-title">🔬 Specialized Data</div>
+                        <div class="file-inputs">
+                            <div class="input-group">
+                                <div class="input-label">Statistical Software Files</div>
+                                <div class="input-description">SPSS/R/SAS datasets • ~15 MB per 1000 cases</div>
+                                <div class="input-field">
+                                    <input type="number" id="stats-files" min="0" value="0" placeholder="Number of datasets">
+                                </div>
+                            </div>
+                            
+                            <div class="input-group">
+                                <div class="input-label">Lab Equipment Output</div>
+                                <div class="input-description">Instrument data files • ~50 MB average</div>
+                                <div class="input-field">
+                                    <input type="number" id="lab-data" min="0" value="0" placeholder="Number of files">
+                                </div>
+                            </div>
+                            
+                            <div class="input-group">
+                                <div class="input-label">GIS/Mapping Data</div>
+                                <div class="input-description">Shapefiles/rasters • ~100 MB per dataset</div>
+                                <div class="input-field">
+                                    <input type="number" id="gis-data" min="0" value="0" placeholder="Number of datasets">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="multiplier-section">
+                    <h3>🎯 Storage Strategy</h3>
+                    <p>Account for backups, versioning, and growth:</p>
+                    <div class="multiplier-grid">
+                        <div class="multiplier-btn" data-multiplier="1">
+                            <span class="main-text">Raw Only</span>
+                            <span class="sub-text">No redundancy</span>
+                        </div>
+                        <div class="multiplier-btn active" data-multiplier="3">
+                            <span class="main-text">Standard</span>
+                            <span class="sub-text">+Backup +Working</span>
+                        </div>
+                        <div class="multiplier-btn" data-multiplier="4">
+                            <span class="main-text">Versioning</span>
+                            <span class="sub-text">+Multiple versions</span>
+                        </div>
+                        <div class="multiplier-btn" data-multiplier="5">
+                            <span class="main-text">Growth Buffer</span>
+                            <span class="sub-text">+25% expansion</span>
+                        </div>
+                        <div class="multiplier-btn" data-multiplier="7">
+                            <span class="main-text">Enterprise</span>
+                            <span class="sub-text">Full redundancy</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="results-panel">
+                <div class="results-header">
+                    <h2>Storage Requirements</h2>
+                </div>
+
+                <div class="primary-result">
+                    <div class="label">Total Storage Needed</div>
+                    <div class="value" id="total-storage">0 GB</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="storage-progress"></div>
+                    </div>
+                </div>
+
+                <div class="secondary-results">
+                    <div class="result-item">
+                        <span class="label">Base Storage</span>
+                        <span class="value" id="base-storage">0 GB</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="label">Current Multiplier</span>
+                        <span class="value" id="current-multiplier">3x</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="label">Largest Component</span>
+                        <span class="value" id="largest-contributor">None</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="label">In Terabytes</span>
+                        <span class="value" id="total-tb">0.00 TB</span>
+                    </div>
+                </div>
+
+                <div id="warning-message"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const fileSizes = {
+            'audio': 635, // Base: WAV 16-bit per hour
+            'video': 3600, // Base: 1080p medium per hour  
+            'photos': 12, // Base: JPEG high quality per image
+            'excel': 0.3, // Base: 1K basic rows per file
+            'pdfs': 3, // Base: Text-heavy per file
+            'transcripts': 0.1, // MB per hour of audio
+            'survey': 2, // MB per survey
+            'database': 20, // MB per export
+            'word-docs': 2, // MB per document
+            'stats-files': 15, // MB per dataset
+            'lab-data': 50, // MB per file
+            'gis-data': 100 // MB per dataset
+        };
+
+        const fileLabels = {
+            'audio': 'Audio Files',
+            'video': 'Video Files', 
+            'photos': 'Photos/Images',
+            'excel': 'Spreadsheets',
+            'pdfs': 'PDF Documents',
+            'transcripts': 'Text Transcripts',
+            'survey': 'Survey Data',
+            'database': 'Database Files',
+            'word-docs': 'Word Documents',
+            'stats-files': 'Statistical Files',
+            'lab-data': 'Lab Data',
+            'gis-data': 'GIS Data'
+        };
+
+        let currentMultiplier = 3;
+        let audioDuration = 1.0;
+        let videoDuration = 1.0;
+
+        function toggleReference() {
+            const table = document.getElementById('reference-table');
+            table.classList.toggle('show');
+        }
+
+        function updateDurationDisplay(type, value) {
+            const display = document.getElementById(`${type}-duration-display`);
+            display.textContent = `${parseFloat(value).toFixed(1)} hours`;
+        }
+
+        function calculateStorage() {
+            let totalMB = 0;
+            let contributions = {};
+
+            // Calculate each file type
+            Object.keys(fileSizes).forEach(fileType => {
+                const count = parseInt(document.getElementById(fileType).value) || 0;
+                let sizeMB = count * fileSizes[fileType];
+                
+                // Apply duration multipliers for media files
+                if (fileType === 'audio') {
+                    sizeMB *= audioDuration;
+                } else if (fileType === 'video') {
+                    sizeMB *= videoDuration;
+                } else if (fileType === 'transcripts') {
+                    // Assume transcripts are based on hours of audio
+                    sizeMB *= audioDuration;
+                }
+                
+                totalMB += sizeMB;
+                if (sizeMB > 0) {
+                    contributions[fileType] = sizeMB;
+                }
+            });
+
+            const baseGB = totalMB / 1024;
+            const totalGB = baseGB * currentMultiplier;
+            const totalTB = totalGB / 1024;
+
+            // Find largest contributor
+            let largestContributor = 'None';
+            let largestSize = 0;
+            Object.keys(contributions).forEach(fileType => {
+                if (contributions[fileType] > largestSize) {
+                    largestSize = contributions[fileType];
+                    largestContributor = fileLabels[fileType];
+                }
+            });
+
+            // Update display
+            document.getElementById('base-storage').textContent = baseGB.toFixed(1) + ' GB';
+            document.getElementById('total-storage').textContent = totalGB.toFixed(1) + ' GB';
+            document.getElementById('total-tb').textContent = totalTB.toFixed(2) + ' TB';
+            document.getElementById('current-multiplier').textContent = currentMultiplier + 'x';
+            document.getElementById('largest-contributor').textContent = largestContributor;
+
+            // Update progress bar
+            const maxSize = 1000; // GB
+            const progressPercent = Math.min((totalGB / maxSize) * 100, 100);
+            document.getElementById('storage-progress').style.width = progressPercent + '%';
+
+            // Show warnings
+            const warningDiv = document.getElementById('warning-message');
+            if (totalGB > 2000) {
+                warningDiv.innerHTML = '<div class="warning-message warning-critical">🚨 MASSIVE SCALE: ' + (totalTB).toFixed(1) + ' TB requires enterprise infrastructure, dedicated IT support, and significant budget allocation.</div>';
+            } else if (totalGB > 1000) {
+                warningDiv.innerHTML = '<div class="warning-message warning-critical">⚠️ ENTERPRISE TERRITORY: ' + totalGB.toFixed(0) + ' GB requires serious infrastructure planning and professional storage solutions.</div>';
+            } else if (totalGB > 100) {
+                warningDiv.innerHTML = '<div class="warning-message warning-high">💡 SIGNIFICANT STORAGE: ' + totalGB.toFixed(0) + ' GB needs dedicated storage systems and backup strategies.</div>';
+            } else {
+                warningDiv.innerHTML = '';
+            }
+        }
+
+        // Add event listeners for inputs
+        Object.keys(fileSizes).forEach(fileType => {
+            document.getElementById(fileType).addEventListener('input', calculateStorage);
+        });
+
+        // Handle format selection buttons
+        document.querySelectorAll('.format-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const target = this.dataset.target;
+                const size = parseFloat(this.dataset.size);
+                
+                // Update active state
+                this.parentElement.querySelectorAll('.format-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                
+                // Update file size
+                fileSizes[target] = size;
+                calculateStorage();
+            });
+        });
+
+        // Handle duration sliders
+        document.getElementById('audio-duration').addEventListener('input', function() {
+            audioDuration = parseFloat(this.value);
+            updateDurationDisplay('audio', this.value);
+            calculateStorage();
+        });
+
+        document.getElementById('video-duration').addEventListener('input', function() {
+            videoDuration = parseFloat(this.value);
+            updateDurationDisplay('video', this.value);
+            calculateStorage();
+        });
+
+        // Handle multiplier buttons
+        document.querySelectorAll('.multiplier-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.multiplier-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                currentMultiplier = parseFloat(this.dataset.multiplier);
+                calculateStorage();
+            });
+        });
+
+        // Initialize duration displays
+        updateDurationDisplay('audio', '1');
+        updateDurationDisplay('video', '1');
+        
+        // Initial calculation
+        calculateStorage();
+    </script>
+</body>
+</html>
