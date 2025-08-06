@@ -3,538 +3,126 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Research Storage Calculator</title>
+    <title>Lakehead University Research Storage Calculator</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        .storage-calculator {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 20px;
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-        }
-
-        .header {
-            text-align: center;
-            color: white;
-            margin-bottom: 30px;
-        }
-
-        .header h1 {
-            font-size: 2.5em;
-            font-weight: 700;
-            margin-bottom: 10px;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
-        }
-
-        .header p {
-            font-size: 1.2em;
-            opacity: 0.9;
-            max-width: 700px;
-            margin: 0 auto;
-        }
-
-        .main-container {
-            display: grid;
-            grid-template-columns: 1fr 400px;
-            gap: 30px;
-            align-items: start;
-        }
-
-        @media (max-width: 1024px) {
-            .main-container {
-                grid-template-columns: 1fr;
-                gap: 20px;
-            }
-        }
-
-        .calculator-panel {
-            background: white;
-            border-radius: 20px;
-            padding: 30px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.1);
-        }
-
-        .results-panel {
-            position: sticky;
-            top: 20px;
-            background: rgba(255,255,255,0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            padding: 25px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.1);
-            border: 1px solid rgba(255,255,255,0.2);
-        }
-
-        .section-header {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 25px;
-            padding-bottom: 15px;
-            border-bottom: 2px solid #f0f0f0;
-        }
-
-        .section-header h2 {
-            font-size: 1.5em;
-            color: #2c3e50;
-            font-weight: 600;
-        }
-
-        .section-header .icon {
-            font-size: 1.5em;
-        }
-
-        .file-categories {
-            display: grid;
-            gap: 25px;
-        }
-
-        .category {
-            background: #f8f9fa;
-            border-radius: 16px;
-            padding: 20px;
-            border-left: 4px solid;
-            transition: all 0.3s ease;
-        }
-
-        .category:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
-        }
-
-        .category.audio { border-left-color: #e74c3c; }
-        .category.documents { border-left-color: #3498db; }
-        .category.visual { border-left-color: #9b59b6; }
-        .category.data { border-left-color: #27ae60; }
-        .category.specialized { border-left-color: #f39c12; }
-
-        .category-title {
-            font-size: 1.2em;
-            font-weight: 600;
-            color: #2c3e50;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .file-inputs {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 15px;
-        }
-
-        .input-group {
-            background: white;
-            border-radius: 12px;
-            padding: 15px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-            transition: all 0.3s ease;
-        }
-
-        .input-group:hover {
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-        }
-
-        .input-group.has-options {
-            padding-bottom: 5px;
-        }
-
-        .input-label {
-            font-weight: 600;
-            color: #2c3e50;
-            margin-bottom: 4px;
-            font-size: 0.95em;
-        }
-
-        .input-description {
-            font-size: 0.8em;
-            color: #7f8c8d;
-            margin-bottom: 8px;
-        }
-
-        .input-field {
-            position: relative;
-            margin-bottom: 10px;
-        }
-
-        .input-field input {
-            width: 100%;
-            padding: 12px 15px;
-            border: 2px solid #e9ecef;
-            border-radius: 8px;
-            font-size: 16px;
-            transition: all 0.3s ease;
-            background: #fff;
-        }
-
-        .input-field input:focus {
-            outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
-
-        .input-field input:not([value="0"]):not([value=""]) {
-            border-color: #27ae60;
-            background: #f8fff8;
-        }
-
-        .format-options {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-            gap: 6px;
-            margin-bottom: 8px;
-        }
-
-        .format-btn {
-            background: #f8f9fa;
-            border: 1px solid #dee2e6;
-            border-radius: 6px;
-            padding: 6px 10px;
-            text-align: center;
-            cursor: pointer;
-            font-size: 0.8em;
-            font-weight: 500;
-            transition: all 0.2s ease;
-        }
-
-        .format-btn:hover {
-            background: #e9ecef;
-        }
-
-        .format-btn.active {
-            background: #667eea;
-            color: white;
-            border-color: #667eea;
-        }
-
-        .duration-control {
-            margin-bottom: 10px;
-        }
-
-        .duration-control label {
-            font-size: 0.85em;
-            color: #6c757d;
-            margin-bottom: 4px;
-            display: block;
-        }
-
-        .duration-control input[type="range"] {
-            width: 100%;
-            margin-bottom: 4px;
-        }
-
-        .duration-display {
-            text-align: center;
-            font-size: 0.8em;
-            color: #667eea;
-            font-weight: 600;
-        }
-
-        .multiplier-section {
-            background: linear-gradient(135deg, #ffeaa7 0%, #fab1a0 100%);
-            border-radius: 16px;
-            padding: 25px;
-            margin: 25px 0;
-        }
-
-        .multiplier-section h3 {
-            color: #2c3e50;
-            margin-bottom: 10px;
-            font-size: 1.3em;
-        }
-
-        .multiplier-section p {
-            color: #2c3e50;
-            margin-bottom: 20px;
-            opacity: 0.8;
-        }
-
-        .multiplier-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-            gap: 12px;
-        }
-
-        .multiplier-btn {
-            background: white;
-            border: 2px solid #ddd;
-            border-radius: 12px;
-            padding: 15px 10px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-weight: 600;
-            font-size: 0.9em;
-        }
-
-        .multiplier-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-        }
-
-        .multiplier-btn.active {
-            background: #667eea;
-            color: white;
-            border-color: #667eea;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 25px rgba(102, 126, 234, 0.3);
-        }
-
-        .multiplier-btn .main-text {
-            display: block;
-            font-size: 1em;
-        }
-
-        .multiplier-btn .sub-text {
-            display: block;
-            font-size: 0.75em;
-            opacity: 0.7;
-            margin-top: 4px;
-        }
-
-        .results-header {
-            text-align: center;
-            margin-bottom: 25px;
-        }
-
-        .results-header h2 {
-            color: #2c3e50;
-            font-size: 1.8em;
-            margin-bottom: 8px;
-        }
-
-        .primary-result {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            text-align: center;
-            padding: 25px;
-            border-radius: 16px;
-            margin-bottom: 20px;
-        }
-
-        .primary-result .label {
-            font-size: 0.9em;
-            opacity: 0.9;
-            margin-bottom: 5px;
-        }
-
-        .primary-result .value {
-            font-size: 2.5em;
-            font-weight: 700;
-            margin-bottom: 10px;
-        }
-
-        .secondary-results {
-            display: grid;
-            gap: 12px;
-        }
-
-        .result-item {
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 12px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .result-item .label {
-            color: #6c757d;
-            font-size: 0.9em;
-        }
-
-        .result-item .value {
-            font-weight: 600;
-            color: #2c3e50;
-        }
-
-        .warning-message {
-            margin-top: 20px;
-            padding: 15px;
-            border-radius: 12px;
-            font-weight: 600;
-            text-align: center;
-        }
-
-        .warning-high {
-            background: #fff3cd;
-            color: #856404;
-            border: 2px solid #ffeaa7;
-        }
-
-        .warning-critical {
-            background: #f8d7da;
-            color: #721c24;
-            border: 2px solid #f5c6cb;
-        }
-
-        .reference-toggle {
-            background: rgba(255,255,255,0.9);
-            border: 2px solid #667eea;
-            color: #667eea;
-            padding: 12px 24px;
-            border-radius: 25px;
-            cursor: pointer;
-            font-weight: 600;
-            margin: 20px auto;
-            display: block;
-            transition: all 0.3s ease;
-        }
-
-        .reference-toggle:hover {
-            background: #667eea;
-            color: white;
-        }
-
-        .reference-table {
-            background: rgba(255,255,255,0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 16px;
-            padding: 25px;
-            margin: 20px 0;
-            display: none;
-            overflow-x: auto;
-        }
-
-        .reference-table.show {
-            display: block;
-            animation: slideDown 0.3s ease;
-        }
-
-        @keyframes slideDown {
-            from {
-                opacity: 0;
-                transform: translateY(-10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .reference-table table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        .reference-table th,
-        .reference-table td {
-            padding: 12px;
-            text-align: left;
-            border-bottom: 1px solid #e9ecef;
-        }
-
-        .reference-table th {
-            background: #667eea;
-            color: white;
-            font-weight: 600;
-        }
-
-        .reference-table tr:nth-child(even) {
-            background: #f8f9fa;
-        }
-
-        .progress-bar {
-            background: #e9ecef;
-            border-radius: 10px;
-            height: 8px;
-            margin: 10px 0;
-            overflow: hidden;
-        }
-
-        .progress-fill {
-            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
-            height: 100%;
-            border-radius: 10px;
-            transition: width 0.5s ease;
-        }
-
-        @media (max-width: 768px) {
-            .storage-calculator {
-                padding: 15px;
-            }
-
-            .header h1 {
-                font-size: 2em;
-            }
-
-            .calculator-panel,
-            .results-panel {
-                padding: 20px;
-            }
-
-            .file-inputs {
-                grid-template-columns: 1fr;
-            }
-
-            .multiplier-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+        .storage-calculator { max-width: 1400px; margin: 0 auto; padding: 20px; background: linear-gradient(135deg, rgb(0,65,125) 0%, rgb(0,85,145) 100%); min-height: 100vh; }
+        .header { text-align: center; color: white; margin-bottom: 20px; }
+        .header h1 { font-size: 2.5em; font-weight: 700; margin-bottom: 10px; text-shadow: 0 2px 4px rgba(0,0,0,0.3); }
+        .header .sub-header { font-size: 1.5em; font-weight: 500; opacity: 0.9; }
+        .header p { font-size: 1.1em; opacity: 0.9; max-width: 700px; margin: 10px auto 0; }
+        .main-container { display: grid; grid-template-columns: 1fr 400px; gap: 30px; align-items: start; }
+        @media (max-width: 1024px) { .main-container { grid-template-columns: 1fr; } }
+        .calculator-panel, .results-panel { background: white; border-radius: 20px; padding: 30px; box-shadow: 0 20px 60px rgba(0,0,0,0.1); }
+        .results-panel { position: sticky; top: 20px; }
+        .section-header { display: flex; align-items: center; gap: 12px; margin-bottom: 25px; padding-bottom: 15px; border-bottom: 2px solid #f0f0f0; }
+        .section-header h2 { font-size: 1.5em; color: #2c3e50; font-weight: 600; }
+        .file-categories { display: grid; gap: 25px; }
+        .category { background: #f8f9fa; border-radius: 16px; padding: 20px; border-left: 4px solid; transition: all 0.3s ease; }
+        .category:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,0,0,0.1); }
+        .category.audio { border-left-color: rgb(200,30,35); }
+        .category.visual { border-left-color: rgb(255,195,15); }
+        .category.data { border-left-color: rgb(0,65,125); }
+        .category.documents { border-left-color: rgb(200,30,35); }
+        .category.specialized { border-left-color: rgb(0,65,125); }
+        .category.hpc { border-left-color: rgb(200,30,35); }
+        .category.genomics { border-left-color: rgb(255,195,15); }
+        .category.software { border-left-color: rgb(0,65,125); }
+        .category-title { font-size: 1.2em; font-weight: 600; color: #2c3e50; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; }
+        .file-inputs { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px; }
+        .input-group { background: white; border-radius: 12px; padding: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); transition: all 0.3s ease; }
+        .input-group:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+        .input-group.has-options { padding-bottom: 5px; }
+        .input-label { font-weight: 600; color: #2c3e50; margin-bottom: 4px; font-size: 0.95em; }
+        .input-description { font-size: 0.8em; color: #7f8c8d; margin-bottom: 8px; }
+        .input-field { position: relative; margin-bottom: 10px; }
+        .input-field input { width: 100%; padding: 12px 15px; border: 2px solid #e9ecef; border-radius: 8px; font-size: 16px; transition: all 0.3s ease; background: #fff; }
+        .input-field input:focus { outline: none; border-color: rgb(255,195,15); box-shadow: 0 0 0 3px rgba(255, 195, 15, 0.1); }
+        .input-field input:not([value="0"]):not([value=""]) { border-color: rgb(0,65,125); background: rgb(248,252,255); }
+        .format-options { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 6px; margin-bottom: 8px; }
+        .format-btn { background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 6px; padding: 6px 10px; text-align: center; cursor: pointer; font-size: 0.8em; font-weight: 500; transition: all 0.2s ease; }
+        .format-btn:hover { background: #e9ecef; }
+        .format-btn.active { background: rgb(0,65,125); color: white; border-color: rgb(0,65,125); }
+        .duration-control, .generic-slider-control { margin-bottom: 10px; }
+        .duration-control label, .generic-slider-control label { font-size: 0.85em; color: #6c757d; margin-bottom: 4px; display: block; }
+        .duration-control input[type="range"], .generic-slider-control input[type="range"] { width: 100%; margin-bottom: 4px; }
+        .duration-display, .generic-slider-display { text-align: center; font-size: 0.8em; color: rgb(0,65,125); font-weight: 600; }
+        .planning-section { background: linear-gradient(135deg, rgba(0,65,125,0.1) 0%, rgba(0,85,145,0.05) 100%); border: 2px solid rgba(0,65,125,0.2); border-radius: 16px; padding: 25px; margin: 25px 0; }
+        .planning-section h3 { color: #2c3e50; margin-bottom: 10px; font-size: 1.3em; }
+        .planning-section p { color: #2c3e50; margin-bottom: 20px; opacity: 0.8; }
+        .planning-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; }
+        .planning-btn { background: white; border: 2px solid #ddd; border-radius: 12px; padding: 15px 10px; text-align: center; cursor: pointer; transition: all 0.3s ease; font-weight: 600; font-size: 0.9em; }
+        .planning-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+        .planning-btn.active { background: rgb(0,65,125); color: white; border-color: rgb(0,65,125); transform: translateY(-2px); box-shadow: 0 6px 25px rgba(0, 65, 125, 0.3); }
+        .planning-btn .main-text, .multiplier-btn .main-text { display: block; font-size: 1em; }
+        .planning-btn .sub-text, .multiplier-btn .sub-text { display: block; font-size: 0.75em; opacity: 0.7; margin-top: 4px; }
+        #sensitivity-advisory { margin-top: 15px; padding: 15px; border-radius: 12px; font-size: 0.9em; display: none; }
+        #sensitivity-advisory.public { background: #e8f5e9; color: #2e7d32; border: 2px solid #a5d6a7; }
+        #sensitivity-advisory.internal { background: #e3f2fd; color: #1565c0; border: 2px solid #90caf9; }
+        #sensitivity-advisory.confidential { background: #fff3e0; color: #ef6c00; border: 2px solid #ffcc80; }
+        #sensitivity-advisory.restricted { background: #ffebee; color: #c62828; border: 2px solid #ef9a9a; }
+        #sensitivity-advisory a { color: inherit; font-weight: 600; text-decoration: underline; }
+        .results-header { text-align: center; margin-bottom: 25px; }
+        .results-header h2 { color: #2c3e50; font-size: 1.8em; margin-bottom: 8px; }
+        .primary-result { background: linear-gradient(135deg, rgb(0,65,125) 0%, rgb(0,85,145) 100%); color: white; text-align: center; padding: 25px; border-radius: 16px; margin-bottom: 20px; }
+        .primary-result .label { font-size: 0.9em; opacity: 0.9; margin-bottom: 5px; }
+        .primary-result .value { font-size: 2.5em; font-weight: 700; margin-bottom: 10px; }
+        .secondary-results { display: grid; gap: 12px; }
+        .result-item { background: #f8f9fa; padding: 15px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; }
+        .result-item .label { color: #6c757d; font-size: 0.9em; }
+        .result-item .value { font-weight: 600; color: #2c3e50; }
+        .warning-message { margin-top: 20px; padding: 15px; border-radius: 12px; font-weight: 600; text-align: center; }
+        .warning-high { background: rgba(255,195,15,0.1); color: rgb(0,65,125); border: 2px solid rgba(255,195,15,0.5); }
+        .warning-critical { background: rgba(200,30,35,0.1); color: rgb(200,30,35); border: 2px solid rgba(200,30,35,0.3); }
+        .export-btn { background: rgb(255,195,15); color: rgb(0,65,125); border: none; padding: 12px 24px; border-radius: 25px; cursor: pointer; font-weight: 700; font-size:1em; margin: 20px auto 0; display: block; transition: all 0.3s ease; }
+        .export-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 20px rgba(0,0,0,0.2); }
     </style>
 </head>
 <body>
     <div class="storage-calculator">
         <div class="header">
             <h1>🗄️ Research Storage Calculator</h1>
-            <p>Precision storage planning with format-specific estimates, duration controls, and real-world compression ratios. Get accurate projections for your research data.</p>
-        </div>
-
-        <button class="reference-toggle" onclick="toggleReference()">
-            📊 View Detailed File Size Reference
-        </button>
-
-        <div id="reference-table" class="reference-table">
-            <h3>Comprehensive File Size Reference Guide</h3>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Data Type</th>
-                        <th>Format/Quality</th>
-                        <th>Per Hour/Unit</th>
-                        <th>Compression Impact</th>
-                        <th>Research Notes</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr><td rowspan="3"><strong>Audio</strong></td><td>WAV (44.1kHz/16-bit)</td><td>635 MB</td><td>None (uncompressed)</td><td>Standard research quality</td></tr>
-                    <tr><td>MP3 (320kbps)</td><td>144 MB</td><td>~78% smaller</td><td>High quality compressed</td></tr>
-                    <tr><td>WAV (96kHz/24-bit)</td><td>2.07 GB</td><td>None (uncompressed)</td><td>Audiophile/acoustic research</td></tr>
-                    
-                    <tr><td rowspan="4"><strong>Video</strong></td><td>1080p H.264 (medium)</td><td>3.6 GB</td><td>Standard compression</td><td>Most research applications</td></tr>
-                    <tr><td>1080p H.264 (high quality)</td><td>7.2 GB</td><td>Lower compression</td><td>Detailed behavioral analysis</td></tr>
-                    <tr><td>4K H.264 (medium)</td><td>14.4 GB</td><td>Standard compression</td><td>High-resolution documentation</td></tr>
-                    <tr><td>4K H.264 (high quality)</td><td>28.8 GB</td><td>Lower compression</td><td>Scientific/medical imaging</td></tr>
-                    
-                    <tr><td rowspan="3"><strong>Images</strong></td><td>RAW (24MP camera)</td><td>25-45 MB</td><td>None (uncompressed)</td><td>Professional research photos</td></tr>
-                    <tr><td>JPEG (high quality)</td><td>8-15 MB</td><td>~70% smaller</td><td>Standard documentation</td></tr>
-                    <tr><td>Microscopy TIFF</td><td>50-2000 MB</td><td>Varies by resolution</td><td>Scientific imaging varies widely</td></tr>
-                    
-                    <tr><td rowspan="4"><strong>Spreadsheets</strong></td><td>1K rows, basic data</td><td>150-500 KB</td><td>Text compresses well</td><td>Simple datasets</td></tr>
-                    <tr><td>1K rows, mixed data</td><td>1-3 MB</td><td>Complex formulas add size</td><td>Standard research data</td></tr>
-                    <tr><td>10K rows, basic data</td><td>5-15 MB</td><td>Linear scaling</td><td>Large datasets</td></tr>
-                    <tr><td>10K rows, complex</td><td>25-75 MB</td><td>Formulas/formatting heavy</td><td>Advanced analysis files</td></tr>
-                    
-                    <tr><td rowspan="2"><strong>Text</strong></td><td>Transcript (plain text)</td><td>50-150 KB/hour</td><td>Already minimal</td><td>Depends on speech density</td></tr>
-                    <tr><td>Interview (Word doc)</td><td>200-800 KB/hour</td><td>Formatting adds size</td><td>With timestamps/formatting</td></tr>
-                    
-                    <tr><td rowspan="3"><strong>Documents</strong></td><td>Academic PDF (text-heavy)</td><td>1-5 MB</td><td>Text compresses well</td><td>Typical journal articles</td></tr>
-                    <tr><td>Research PDF (with images)</td><td>5-25 MB</td><td>Images dominate size</td><td>Figures and charts</td></tr>
-                    <tr><td>Scan PDF (300 DPI)</td><td>50-200 MB</td><td>Image-based, large</td><td>Digitized documents</td></tr>
-                </tbody>
-            </table>
+            <div class="sub-header">for Lakehead University</div>
+            <p>A comprehensive tool for precision storage planning. Estimate your project's data needs based on file types, security level, and project duration.</p>
         </div>
 
         <div class="main-container">
             <div class="calculator-panel">
+
+                <div class="planning-section">
+                    <h3>✅ Project Setup</h3>
+                    <p>Start by defining the security level and duration of your research project.</p>
+                    <div class="planning-grid">
+                        <div style="grid-column: 1 / -1;">
+                            <label class="input-label">Data Sensitivity Level</label>
+                            <div class="planning-grid" id="sensitivity-selector">
+                                <div class="planning-btn" data-level="public"><span class="main-text">Public</span></div>
+                                <div class="planning-btn active" data-level="internal"><span class="main-text">Internal</span></div>
+                                <div class="planning-btn" data-level="confidential"><span class="main-text">Confidential</span></div>
+                                <div class="planning-btn" data-level="restricted"><span class="main-text">Restricted</span></div>
+                            </div>
+                            <div id="sensitivity-advisory"></div>
+                        </div>
+                        <div style="grid-column: 1 / -1;">
+                            <div class="generic-slider-control">
+                                <label>Project Duration (Data Retention Period)</label>
+                                <input type="range" id="project-duration" min="1" max="10" step="1" value="5">
+                                <div class="generic-slider-display" id="project-duration-display">5 Years</div>
+                            </div>
+                        </div>
+                         <div style="grid-column: 1 / -1;">
+                            <div class="input-group">
+                                <div class="input-label">Number of Collaborators</div>
+                                <div class="input-field">
+                                     <input type="number" id="collaborators" min="1" value="1" placeholder="e.g., 3">
+                                </div>
+                                <div id="collaboration-advisory" class="input-description"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="section-header">
                     <span class="icon">🧮</span>
                     <h2>File Requirements</h2>
@@ -545,299 +133,226 @@
                         <div class="category-title">🎵 Audio Files</div>
                         <div class="file-inputs">
                             <div class="input-group has-options">
-                                <div class="input-label">Audio Recordings</div>
-                                <div class="input-description">Choose format and set duration</div>
+                                <div class="input-label">Audio Recordings</div><div class="input-description">Choose format and duration</div>
                                 <div class="format-options">
-                                    <div class="format-btn active" data-target="audio" data-size="635">WAV 16-bit</div>
-                                    <div class="format-btn" data-target="audio" data-size="144">MP3 320k</div>
-                                    <div class="format-btn" data-target="audio" data-size="2073">WAV 24-bit</div>
+                                    <div class="format-btn active" data-target="audio_standard" data-size="635">WAV 16-bit</div>
+                                    <div class="format-btn" data-target="audio_standard" data-size="144">MP3 320k</div>
+                                    <div class="format-btn" data-target="audio_standard" data-size="2073">WAV 24-bit</div>
                                 </div>
                                 <div class="duration-control">
-                                    <label>Average Duration per Recording</label>
-                                    <input type="range" id="audio-duration" min="0.25" max="8" step="0.25" value="1">
-                                    <div class="duration-display" id="audio-duration-display">1.0 hours</div>
+                                    <label>Avg Duration</label><input type="range" id="audio-duration" min="0.25" max="8" step="0.25" value="1"><div class="duration-display" id="audio-duration-display">1.0 hours</div>
                                 </div>
-                                <div class="input-field">
-                                    <input type="number" id="audio" min="0" value="0" placeholder="Number of recordings">
-                                </div>
+                                <div class="input-field"><input type="number" id="audio_standard" min="0" value="0" placeholder="Number of recordings"></div>
                             </div>
-                            
-                            <div class="input-group">
-                                <div class="input-label">Transcripts</div>
-                                <div class="input-description">Plain text • ~100 KB per hour of audio</div>
-                                <div class="input-field">
-                                    <input type="number" id="transcripts" min="0" value="0" placeholder="Number of transcripts">
-                                </div>
-                            </div>
+                             <div class="input-group"><div class="input-label">Compressed Voice</div><div class="input-description">M4A/AAC files ~60MB/hr</div><div class="input-field"><input type="number" id="audio_compressed" min="0" value="0" placeholder="Number of hours"></div></div>
+                             <div class="input-group"><div class="input-label">Transcripts</div><div class="input-description">Plain text ~0.1MB/hr</div><div class="input-field"><input type="number" id="transcripts" min="0" value="0" placeholder="Number of hours"></div></div>
                         </div>
                     </div>
-
+                    
                     <div class="category visual">
                         <div class="category-title">📹 Video & Images</div>
                         <div class="file-inputs">
                             <div class="input-group has-options">
-                                <div class="input-label">Video Recordings</div>
-                                <div class="input-description">Select quality and duration</div>
+                                <div class="input-label">Video Recordings</div><div class="input-description">Select quality and duration</div>
                                 <div class="format-options">
-                                    <div class="format-btn active" data-target="video" data-size="3600">1080p Med</div>
-                                    <div class="format-btn" data-target="video" data-size="7200">1080p High</div>
-                                    <div class="format-btn" data-target="video" data-size="14400">4K Med</div>
-                                    <div class="format-btn" data-target="video" data-size="28800">4K High</div>
+                                    <div class="format-btn active" data-target="video" data-size="3600">1080p Med</div><div class="format-btn" data-target="video" data-size="7200">1080p High</div><div class="format-btn" data-target="video" data-size="14400">4K Med</div><div class="format-btn" data-target="video" data-size="28800">4K High</div>
                                 </div>
                                 <div class="duration-control">
-                                    <label>Average Duration per Recording</label>
-                                    <input type="range" id="video-duration" min="0.25" max="4" step="0.25" value="1">
-                                    <div class="duration-display" id="video-duration-display">1.0 hours</div>
+                                    <label>Avg Duration</label><input type="range" id="video-duration" min="0.25" max="4" step="0.25" value="1"><div class="duration-display" id="video-duration-display">1.0 hours</div>
                                 </div>
-                                <div class="input-field">
-                                    <input type="number" id="video" min="0" value="0" placeholder="Number of recordings">
-                                </div>
+                                <div class="input-field"><input type="number" id="video" min="0" value="0" placeholder="Number of recordings"></div>
                             </div>
-                            
                             <div class="input-group has-options">
-                                <div class="input-label">Research Photos</div>
-                                <div class="input-description">Choose format and image type</div>
+                                <div class="input-label">Research Photos</div><div class="input-description">Choose format</div>
                                 <div class="format-options">
-                                    <div class="format-btn active" data-target="photos" data-size="12">JPEG High</div>
-                                    <div class="format-btn" data-target="photos" data-size="35">RAW Standard</div>
-                                    <div class="format-btn" data-target="photos" data-size="300">Microscopy</div>
+                                    <div class="format-btn active" data-target="photos" data-size="12">JPEG High</div><div class="format-btn" data-target="photos" data-size="35">RAW</div><div class="format-btn" data-target="photos" data-size="300">Microscopy</div>
                                 </div>
-                                <div class="input-field">
-                                    <input type="number" id="photos" min="0" value="0" placeholder="Number of images">
-                                </div>
+                                <div class="input-field"><input type="number" id="photos" min="0" value="0" placeholder="Number of images"></div>
                             </div>
+                             <div class="input-group"><div class="input-label">Confocal Microscopy</div><div class="input-description">Image stacks ~5GB avg</div><div class="input-field"><input type="number" id="img_confocal" min="0" value="0" placeholder="Number of stacks"></div></div>
+                             <div class="input-group"><div class="input-label">Digital Pathology</div><div class="input-description">Scanned slides ~2GB avg</div><div class="input-field"><input type="number" id="img_pathology" min="0" value="0" placeholder="Number of slides"></div></div>
                         </div>
                     </div>
 
                     <div class="category data">
-                        <div class="category-title">📊 Data & Spreadsheets</div>
+                        <div class="category-title">📊 Data & Documents</div>
                         <div class="file-inputs">
                             <div class="input-group has-options">
-                                <div class="input-label">Excel/CSV Files</div>
-                                <div class="input-description">Select data complexity</div>
+                                <div class="input-label">Spreadsheets (Excel/CSV)</div><div class="input-description">Select complexity</div>
                                 <div class="format-options">
-                                    <div class="format-btn active" data-target="excel" data-size="0.3">1K Basic</div>
-                                    <div class="format-btn" data-target="excel" data-size="2">1K Mixed</div>
-                                    <div class="format-btn" data-target="excel" data-size="10">10K Basic</div>
-                                    <div class="format-btn" data-target="excel" data-size="50">10K Complex</div>
+                                    <div class="format-btn active" data-target="excel" data-size="0.3">1K Basic</div><div class="format-btn" data-target="excel" data-size="2">1K Mixed</div><div class="format-btn" data-target="excel" data-size="10">10K Basic</div><div class="format-btn" data-target="excel" data-size="50">10K Complex</div>
                                 </div>
-                                <div class="input-field">
-                                    <input type="number" id="excel" min="0" value="0" placeholder="Number of files">
-                                </div>
+                                <div class="input-field"><input type="number" id="excel" min="0" value="0" placeholder="Number of files"></div>
                             </div>
-                            
-                            <div class="input-group">
-                                <div class="input-label">Survey Data Files</div>
-                                <div class="input-description">Typical survey export • ~2 MB per 1000 responses</div>
-                                <div class="input-field">
-                                    <input type="number" id="survey" min="0" value="0" placeholder="Number of surveys">
+                            <div class="input-group has-options">
+                                <div class="input-label">PDF Documents</div><div class="input-description">Select document type</div>
+                                <div class="format-options">
+                                    <div class="format-btn active" data-target="pdfs" data-size="3">Text Heavy</div><div class="format-btn" data-target="pdfs" data-size="12">With Images</div><div class="format-btn" data-target="pdfs" data-size="120">Scanned</div>
                                 </div>
+                                <div class="input-field"><input type="number" id="pdfs" min="0" value="0" placeholder="Number of PDFs"></div>
                             </div>
-                            
-                            <div class="input-group">
-                                <div class="input-label">Database Exports</div>
-                                <div class="input-description">SQL/CSV exports • ~20 MB per 1000 records</div>
-                                <div class="input-field">
-                                    <input type="number" id="database" min="0" value="0" placeholder="Number of exports">
-                                </div>
-                            </div>
+                            <div class="input-group"><div class="input-label">Survey Data</div><div class="input-description">~2MB per 1000 responses</div><div class="input-field"><input type="number" id="survey" min="0" value="0" placeholder="Number of exports"></div></div>
+                            <div class="input-group"><div class="input-label">Word Documents</div><div class="input-description">Reports/papers ~2MB avg</div><div class="input-field"><input type="number" id="word-docs" min="0" value="0" placeholder="Number of documents"></div></div>
                         </div>
                     </div>
-
-                    <div class="category documents">
-                        <div class="category-title">📄 Documents</div>
+                    
+                    <div class="category hpc">
+                        <div class="category-title">💨 HPC & Simulation</div>
                         <div class="file-inputs">
-                            <div class="input-group has-options">
-                                <div class="input-label">PDF Documents</div>
-                                <div class="input-description">Select document type</div>
-                                <div class="format-options">
-                                    <div class="format-btn active" data-target="pdfs" data-size="3">Text Heavy</div>
-                                    <div class="format-btn" data-target="pdfs" data-size="12">With Images</div>
-                                    <div class="format-btn" data-target="pdfs" data-size="120">Scanned Docs</div>
-                                </div>
-                                <div class="input-field">
-                                    <input type="number" id="pdfs" min="0" value="0" placeholder="Number of PDFs">
-                                </div>
-                            </div>
-                            
-                            <div class="input-group">
-                                <div class="input-label">Word Documents</div>
-                                <div class="input-description">Research papers/reports • ~2 MB average</div>
-                                <div class="input-field">
-                                    <input type="number" id="word-docs" min="0" value="0" placeholder="Number of documents">
-                                </div>
-                            </div>
+                            <div class="input-group"><div class="input-label">Simulation Checkpoints</div><div class="input-description">~5GB avg per file</div><div class="input-field"><input type="number" id="hpc_checkpoint" min="0" value="0" placeholder="Number of files"></div></div>
+                            <div class="input-group"><div class="input-label">Raw Simulation Output</div><div class="input-description">~50GB avg per run</div><div class="input-field"><input type="number" id="hpc_raw" min="0" value="0" placeholder="Number of runs"></div></div>
+                            <div class="input-group"><div class="input-label">Post-Processed Data</div><div class="input-description">~10GB avg per dataset</div><div class="input-field"><input type="number" id="hpc_processed" min="0" value="0" placeholder="Number of datasets"></div></div>
+                        </div>
+                    </div>
+                    
+                    <div class="category genomics">
+                        <div class="category-title">🧬 Genomics & Bioinformatics</div>
+                        <div class="file-inputs">
+                            <div class="input-group"><div class="input-label">Raw Sequencer Output (BCL)</div><div class="input-description">~400GB avg per run</div><div class="input-field"><input type="number" id="geno_bcl" min="0" value="0" placeholder="Number of runs"></div></div>
+                            <div class="input-group"><div class="input-label">Unaligned Reads (FASTQ)</div><div class="input-description">~30GB avg per sample</div><div class="input-field"><input type="number" id="geno_fastq" min="0" value="0" placeholder="Number of samples"></div></div>
+                            <div class="input-group"><div class="input-label">Aligned Data (BAM/SAM)</div><div class="input-description">~40GB avg per sample</div><div class="input-field"><input type="number" id="geno_bam" min="0" value="0" placeholder="Number of samples"></div></div>
+                            <div class="input-group"><div class="input-label">Variant Call Files (VCF)</div><div class="input-description">~1GB avg per sample</div><div class="input-field"><input type="number" id="geno_vcf" min="0" value="0" placeholder="Number of samples"></div></div>
                         </div>
                     </div>
 
                     <div class="category specialized">
-                        <div class="category-title">🔬 Specialized Data</div>
+                        <div class="category-title">🔬 Specialized & Custom Data</div>
                         <div class="file-inputs">
-                            <div class="input-group">
-                                <div class="input-label">Statistical Software Files</div>
-                                <div class="input-description">SPSS/R/SAS datasets • ~15 MB per 1000 cases</div>
-                                <div class="input-field">
-                                    <input type="number" id="stats-files" min="0" value="0" placeholder="Number of datasets">
-                                </div>
-                            </div>
-                            
-                            <div class="input-group">
-                                <div class="input-label">Lab Equipment Output</div>
-                                <div class="input-description">Instrument data files • ~50 MB average</div>
-                                <div class="input-field">
-                                    <input type="number" id="lab-data" min="0" value="0" placeholder="Number of files">
-                                </div>
-                            </div>
-                            
-                            <div class="input-group">
-                                <div class="input-label">GIS/Mapping Data</div>
-                                <div class="input-description">Shapefiles/rasters • ~100 MB per dataset</div>
-                                <div class="input-field">
-                                    <input type="number" id="gis-data" min="0" value="0" placeholder="Number of datasets">
-                                </div>
-                            </div>
+                            <div class="input-group"><div class="input-label">GIS/Mapping Data</div><div class="input-description">Shapefiles/rasters ~100MB avg</div><div class="input-field"><input type="number" id="gis-data" min="0" value="0" placeholder="Number of datasets"></div></div>
+                             <div class="input-group"><div class="input-label">LiDAR Geospatial Data</div><div class="input-description">Point clouds ~20GB avg</div><div class="input-field"><input type="number" id="gis_lidar" min="0" value="0" placeholder="Number of scans"></div></div>
+                             <div class="input-group"><div class="input-label">Digital Humanities Data</div><div class="input-description">Text corpora, 3D models ~5GB avg</div><div class="input-field"><input type="number" id="digital_humanities" min="0" value="0" placeholder="Number of collections"></div></div>
+                             <div class="input-group"><div class="input-label">Custom Data Type</div><div class="input-description">Enter size per file in MB</div><div class="input-field"><input type="number" id="custom_size" min="0" value="100" placeholder="Size in MB"></div><div class="input-field"><input type="number" id="custom_count" min="0" value="0" placeholder="Number of files"></div></div>
+                        </div>
+                    </div>
+                    
+                    <div class="category software">
+                        <div class="category-title">💾 Software & Project Files</div>
+                        <div class="file-inputs">
+                             <div class="input-group"><div class="input-label">Statistical Software</div><div class="input-description">SPSS/R/SAS ~15MB/1k cases</div><div class="input-field"><input type="number" id="stats-files" min="0" value="0" placeholder="Number of datasets"></div></div>
+                             <div class="input-group"><div class="input-label">NVivo Project Files</div><div class="input-description">Qualitative data ~1GB avg</div><div class="input-field"><input type="number" id="nvivo" min="0" value="0" placeholder="Number of projects"></div></div>
+                             <div class="input-group"><div class="input-label">MATLAB Workspace</div><div class="input-description">.mat files ~500MB avg</div><div class="input-field"><input type="number" id="matlab" min="0" value="0" placeholder="Number of workspaces"></div></div>
                         </div>
                     </div>
                 </div>
 
-                <div class="multiplier-section">
+                <div class="planning-section">
                     <h3>🎯 Storage Strategy</h3>
-                    <p>Account for backups, versioning, and growth:</p>
-                    <div class="multiplier-grid">
-                        <div class="multiplier-btn" data-multiplier="1">
-                            <span class="main-text">Raw Only</span>
-                            <span class="sub-text">No redundancy</span>
-                        </div>
-                        <div class="multiplier-btn active" data-multiplier="3">
-                            <span class="main-text">Standard</span>
-                            <span class="sub-text">+Backup +Working</span>
-                        </div>
-                        <div class="multiplier-btn" data-multiplier="4">
-                            <span class="main-text">Versioning</span>
-                            <span class="sub-text">+Multiple versions</span>
-                        </div>
-                        <div class="multiplier-btn" data-multiplier="5">
-                            <span class="main-text">Growth Buffer</span>
-                            <span class="sub-text">+25% expansion</span>
-                        </div>
-                        <div class="multiplier-btn" data-multiplier="7">
-                            <span class="main-text">Enterprise</span>
-                            <span class="sub-text">Full redundancy</span>
-                        </div>
+                    <p>Select a multiplier to account for backups, versioning, and growth. Your selection may be updated based on your data sensitivity level.</p>
+                    <div class="planning-grid" id="multiplier-selector">
+                        <div class="planning-btn multiplier-btn" data-multiplier="1"><span class="main-text">Raw Only</span><span class="sub-text">No redundancy</span></div>
+                        <div class="planning-btn multiplier-btn active" data-multiplier="3"><span class="main-text">Standard</span><span class="sub-text">3-2-1 Backup</span></div>
+                        <div class="planning-btn multiplier-btn" data-multiplier="4"><span class="main-text">Versioning</span><span class="sub-text">+ Multiple versions</span></div>
+                        <div class="planning-btn multiplier-btn" data-multiplier="7"><span class="main-text">Enterprise</span><span class="sub-text">Full redundancy</span></div>
                     </div>
                 </div>
             </div>
 
             <div class="results-panel">
-                <div class="results-header">
-                    <h2>Storage Requirements</h2>
-                </div>
-
+                <div class="results-header"><h2>Storage Requirements</h2></div>
                 <div class="primary-result">
-                    <div class="label">Total Storage Needed</div>
+                    <div class="label">Total Active Storage</div>
                     <div class="value" id="total-storage">0 GB</div>
-                    <div class="progress-bar">
-                        <div class="progress-fill" id="storage-progress"></div>
-                    </div>
+                    <div class="progress-bar"><div class="progress-fill" id="storage-progress"></div></div>
                 </div>
-
                 <div class="secondary-results">
-                    <div class="result-item">
-                        <span class="label">Base Storage</span>
-                        <span class="value" id="base-storage">0 GB</span>
-                    </div>
-                    <div class="result-item">
-                        <span class="label">Current Multiplier</span>
-                        <span class="value" id="current-multiplier">3x</span>
-                    </div>
-                    <div class="result-item">
-                        <span class="label">Largest Component</span>
-                        <span class="value" id="largest-contributor">None</span>
-                    </div>
-                    <div class="result-item">
-                        <span class="label">In Terabytes</span>
-                        <span class="value" id="total-tb">0.00 TB</span>
-                    </div>
+                    <div class="result-item"><span class="label">Base Data Size</span><span class="value" id="base-storage">0 GB</span></div>
+                    <div class="result-item"><span class="label">Storage Multiplier</span><span class="value" id="current-multiplier">3x</span></div>
+                    <div class="result-item"><span class="label">Total in Terabytes</span><span class="value" id="total-tb">0.00 TB</span></div>
+                    <div class="result-item"><span class="label">Largest Component</span><span class="value" id="largest-contributor">None</span></div>
+                    <div class="result-item" style="background: #e3f2fd; border: 1px solid #90caf9;"><span class="label">Long-Term Archival</span><span class="value" id="archival-storage">0 GB</span></div>
                 </div>
-
                 <div id="warning-message"></div>
+                <button class="export-btn" id="export-btn">📋 Export Results for DMP</button>
             </div>
         </div>
     </div>
 
     <script>
+        // --- DATA ---
         const fileSizes = {
-            'audio': 635, // Base: WAV 16-bit per hour
-            'video': 3600, // Base: 1080p medium per hour  
-            'photos': 12, // Base: JPEG high quality per image
-            'excel': 0.3, // Base: 1K basic rows per file
-            'pdfs': 3, // Base: Text-heavy per file
-            'transcripts': 0.1, // MB per hour of audio
-            'survey': 2, // MB per survey
-            'database': 20, // MB per export
-            'word-docs': 2, // MB per document
-            'stats-files': 15, // MB per dataset
-            'lab-data': 50, // MB per file
-            'gis-data': 100 // MB per dataset
+            'audio_standard': 635, 'audio_compressed': 60, 'transcripts': 0.1,
+            'video': 3600, 'photos': 12, 'img_confocal': 5000, 'img_pathology': 2000,
+            'excel': 0.3, 'pdfs': 3, 'survey': 2, 'word-docs': 2,
+            'hpc_checkpoint': 5000, 'hpc_raw': 50000, 'hpc_processed': 10000,
+            'geno_bcl': 400000, 'geno_fastq': 30000, 'geno_bam': 40000, 'geno_vcf': 1000,
+            'gis-data': 100, 'gis_lidar': 20000, 'digital_humanities': 5000,
+            'stats-files': 15, 'nvivo': 1000, 'matlab': 500,
+            'custom': 100
         };
 
         const fileLabels = {
-            'audio': 'Audio Files',
-            'video': 'Video Files', 
-            'photos': 'Photos/Images',
-            'excel': 'Spreadsheets',
-            'pdfs': 'PDF Documents',
-            'transcripts': 'Text Transcripts',
-            'survey': 'Survey Data',
-            'database': 'Database Files',
-            'word-docs': 'Word Documents',
-            'stats-files': 'Statistical Files',
-            'lab-data': 'Lab Data',
-            'gis-data': 'GIS Data'
+            'audio_standard': 'Audio Recordings', 'audio_compressed': 'Compressed Audio', 'transcripts': 'Transcripts',
+            'video': 'Video Recordings', 'photos': 'Photos/Images', 'img_confocal': 'Confocal Microscopy', 'img_pathology': 'Digital Pathology',
+            'excel': 'Spreadsheets', 'pdfs': 'PDF Documents', 'survey': 'Survey Data', 'word-docs': 'Word Documents',
+            'hpc_checkpoint': 'HPC Checkpoints', 'hpc_raw': 'HPC Raw Output', 'hpc_processed': 'HPC Processed Data',
+            'geno_bcl': 'Raw Sequencer Output', 'geno_fastq': 'FASTQ Reads', 'geno_bam': 'Aligned BAM/SAM', 'geno_vcf': 'Variant Call Files',
+            'gis-data': 'GIS Data', 'gis_lidar': 'LiDAR Scans', 'digital_humanities': 'Digital Humanities',
+            'stats-files': 'Statistical Files', 'nvivo': 'NVivo Projects', 'matlab': 'MATLAB Workspaces',
+            'custom': 'Custom Data'
+        };
+        
+        const sensitivityAdvisories = {
+            'public': '<strong>Public Data:</strong> Suitable for open access. Standard backup procedures are recommended. Ensure no personal or sensitive information is included.',
+            'internal': '<strong>Internal Data:</strong> For use within Lakehead University. Use university-provided storage like OneDrive or network drives. Standard 3-2-1 backup strategy is advised.',
+            'confidential': '<strong>Confidential Data:</strong> Contains sensitive information (e.g., identifiable human participant data). Requires encrypted storage and controlled access. Consult the <a href="#" target="_blank">IT Storage Guide</a> and your <a href="#" target="_blank">DMP</a>. A higher redundancy strategy is recommended.',
+            'restricted': '<strong>Restricted Data:</strong> Highly sensitive data that could cause significant harm if disclosed. Requires the highest level of security. You must consult with IT Security and the <a href="#" target="_blank">Research Ethics Board</a>. Enterprise-level storage and backup are mandatory.'
         };
 
         let currentMultiplier = 3;
         let audioDuration = 1.0;
         let videoDuration = 1.0;
+        let projectDuration = 5;
+        let sensitivityLevel = 'internal';
 
-        function toggleReference() {
-            const table = document.getElementById('reference-table');
-            table.classList.toggle('show');
-        }
+        // --- DOM ELEMENTS ---
+        const allInputs = document.querySelectorAll('input[type="number"], input[type="range"]');
+        const formatBtns = document.querySelectorAll('.format-btn');
+        const multiplierBtns = document.querySelectorAll('.multiplier-btn');
+        const sensitivityBtns = document.querySelectorAll('#sensitivity-selector .planning-btn');
+        const exportBtn = document.getElementById('export-btn');
 
-        function updateDurationDisplay(type, value) {
-            const display = document.getElementById(`${type}-duration-display`);
-            display.textContent = `${parseFloat(value).toFixed(1)} hours`;
+        // --- FUNCTIONS ---
+        function formatBytes(mb) {
+            if (mb < 1024) return `${mb.toFixed(1)} MB`;
+            const gb = mb / 1024;
+            if (gb < 1024) return `${gb.toFixed(1)} GB`;
+            const tb = gb / 1024;
+            return `${tb.toFixed(2)} TB`;
         }
 
         function calculateStorage() {
             let totalMB = 0;
             let contributions = {};
 
-            // Calculate each file type
+            // Calculate from standard inputs
             Object.keys(fileSizes).forEach(fileType => {
-                const count = parseInt(document.getElementById(fileType).value) || 0;
+                if (fileType === 'custom') return;
+                const countEl = document.getElementById(fileType);
+                if (!countEl) return;
+
+                const count = parseFloat(countEl.value) || 0;
                 let sizeMB = count * fileSizes[fileType];
                 
-                // Apply duration multipliers for media files
-                if (fileType === 'audio') {
-                    sizeMB *= audioDuration;
-                } else if (fileType === 'video') {
-                    sizeMB *= videoDuration;
-                } else if (fileType === 'transcripts') {
-                    // Assume transcripts are based on hours of audio
-                    sizeMB *= audioDuration;
-                }
+                if (fileType === 'audio_standard') sizeMB *= audioDuration;
+                if (fileType === 'video') sizeMB *= videoDuration;
                 
                 totalMB += sizeMB;
-                if (sizeMB > 0) {
-                    contributions[fileType] = sizeMB;
-                }
+                if (sizeMB > 0) contributions[fileType] = sizeMB;
             });
+
+            // Calculate custom data
+            const customCount = parseFloat(document.getElementById('custom_count').value) || 0;
+            const customSize = parseFloat(document.getElementById('custom_size').value) || 0;
+            const customTotal = customCount * customSize;
+            if (customTotal > 0) {
+                totalMB += customTotal;
+                contributions['custom'] = customTotal;
+            }
 
             const baseGB = totalMB / 1024;
             const totalGB = baseGB * currentMultiplier;
             const totalTB = totalGB / 1024;
+            const archivalGB = totalGB * projectDuration * 0.5; // Simple archival model
 
             // Find largest contributor
             let largestContributor = 'None';
@@ -848,81 +363,163 @@
                     largestContributor = fileLabels[fileType];
                 }
             });
+            
+            updateDisplay(baseGB, totalGB, totalTB, archivalGB, largestContributor);
+            updateWarnings(totalGB, totalTB);
+        }
 
-            // Update display
-            document.getElementById('base-storage').textContent = baseGB.toFixed(1) + ' GB';
-            document.getElementById('total-storage').textContent = totalGB.toFixed(1) + ' GB';
-            document.getElementById('total-tb').textContent = totalTB.toFixed(2) + ' TB';
-            document.getElementById('current-multiplier').textContent = currentMultiplier + 'x';
+        function updateDisplay(baseGB, totalGB, totalTB, archivalGB, largestContributor) {
+            document.getElementById('base-storage').textContent = `${baseGB.toFixed(1)} GB`;
+            document.getElementById('total-storage').textContent = totalGB < 1024 ? `${totalGB.toFixed(1)} GB` : `${totalTB.toFixed(2)} TB`;
+            document.getElementById('total-tb').textContent = `${totalTB.toFixed(2)} TB`;
+            document.getElementById('current-multiplier').textContent = `${currentMultiplier}x`;
             document.getElementById('largest-contributor').textContent = largestContributor;
+            document.getElementById('archival-storage').textContent = archivalGB < 1024 ? `${archivalGB.toFixed(1)} GB` : `${(archivalGB/1024).toFixed(2)} TB`;
 
-            // Update progress bar
-            const maxSize = 1000; // GB
-            const progressPercent = Math.min((totalGB / maxSize) * 100, 100);
-            document.getElementById('storage-progress').style.width = progressPercent + '%';
-
-            // Show warnings
+            const progressPercent = Math.min((totalGB / 2000) * 100, 100); // Progress bar relative to 2TB
+            document.getElementById('storage-progress').style.width = `${progressPercent}%`;
+        }
+        
+        function updateWarnings(totalGB, totalTB) {
             const warningDiv = document.getElementById('warning-message');
-            if (totalGB > 2000) {
-                warningDiv.innerHTML = '<div class="warning-message warning-critical">🚨 MASSIVE SCALE: ' + (totalTB).toFixed(1) + ' TB requires enterprise infrastructure, dedicated IT support, and significant budget allocation.</div>';
-            } else if (totalGB > 1000) {
-                warningDiv.innerHTML = '<div class="warning-message warning-critical">⚠️ ENTERPRISE TERRITORY: ' + totalGB.toFixed(0) + ' GB requires serious infrastructure planning and professional storage solutions.</div>';
-            } else if (totalGB > 100) {
-                warningDiv.innerHTML = '<div class="warning-message warning-high">💡 SIGNIFICANT STORAGE: ' + totalGB.toFixed(0) + ' GB needs dedicated storage systems and backup strategies.</div>';
+            if (totalTB > 5) {
+                warningDiv.innerHTML = `<div class="warning-message warning-critical">🚨 MASSIVE SCALE: ${totalTB.toFixed(1)} TB requires enterprise infrastructure, dedicated IT support, and significant budget allocation. Please contact IT for a consultation.</div>`;
+            } else if (totalTB > 1) {
+                warningDiv.innerHTML = `<div class="warning-message warning-critical">⚠️ ENTERPRISE TERRITORY: ${totalTB.toFixed(1)} TB requires serious infrastructure planning and professional storage solutions.</div>`;
+            } else if (totalGB > 200) {
+                warningDiv.innerHTML = `<div class="warning-message warning-high">💡 SIGNIFICANT STORAGE: ${totalGB.toFixed(0)} GB needs dedicated storage systems and backup strategies. Ensure your DMP is robust.</div>`;
             } else {
                 warningDiv.innerHTML = '';
             }
         }
+        
+        function handleSensitivityChange(level) {
+            sensitivityLevel = level;
+            const advisoryDiv = document.getElementById('sensitivity-advisory');
+            advisoryDiv.innerHTML = sensitivityAdvisories[level];
+            advisoryDiv.className = level;
+            advisoryDiv.style.display = 'block';
 
-        // Add event listeners for inputs
-        Object.keys(fileSizes).forEach(fileType => {
-            document.getElementById(fileType).addEventListener('input', calculateStorage);
-        });
+            // Suggest multipliers
+            let suggestedMultiplier = 3;
+            if (level === 'confidential') suggestedMultiplier = 4;
+            if (level === 'restricted') suggestedMultiplier = 7;
+            
+            document.querySelectorAll('.multiplier-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (parseFloat(btn.dataset.multiplier) === suggestedMultiplier) {
+                    btn.classList.add('active');
+                    currentMultiplier = suggestedMultiplier;
+                }
+            });
+            calculateStorage();
+        }
+        
+        function exportResults() {
+            const baseGB = document.getElementById('base-storage').textContent;
+            const totalStorage = document.getElementById('total-storage').textContent;
+            const archivalStorage = document.getElementById('archival-storage').textContent;
+            const multiplier = document.getElementById('current-multiplier').textContent;
 
-        // Handle format selection buttons
-        document.querySelectorAll('.format-btn').forEach(btn => {
+            let report = `RESEARCH STORAGE ESTIMATION REPORT\n`;
+            report += `Generated: ${new Date().toLocaleString()}\n\n`;
+            report += `--- PROJECT OVERVIEW ---\n`;
+            report += `Data Sensitivity Level: ${sensitivityLevel.charAt(0).toUpperCase() + sensitivityLevel.slice(1)}\n`;
+            report += `Project Duration / Retention: ${projectDuration} years\n`;
+            report += `Collaborators: ${document.getElementById('collaborators').value}\n\n`;
+
+            report += `--- STORAGE SUMMARY ---\n`;
+            report += `Base Data Size: ${baseGB}\n`;
+            report += `Storage Strategy Multiplier: ${multiplier}\n`;
+            report += `TOTAL ACTIVE STORAGE: ${totalStorage}\n`;
+            report += `ESTIMATED LONG-TERM ARCHIVAL: ${archivalStorage}\n\n`;
+            
+            report += `--- FILE BREAKDOWN ---\n`;
+            let hasFiles = false;
+            Object.keys(fileLabels).forEach(id => {
+                 const input = document.getElementById(id);
+                 if (input && parseFloat(input.value) > 0) {
+                     report += `${fileLabels[id]}: ${input.value} files/units\n`;
+                     hasFiles = true;
+                 }
+            });
+             const customCount = parseFloat(document.getElementById('custom_count').value) || 0;
+            if (customCount > 0) {
+                report += `Custom Data: ${customCount} files at ${document.getElementById('custom_size').value} MB/file\n`;
+                hasFiles = true;
+            }
+            if (!hasFiles) report += `No files entered.\n`;
+
+            const blob = new Blob([report], { type: 'text/plain' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'Lakehead-Storage-Estimation.txt';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+
+        // --- EVENT LISTENERS ---
+        allInputs.forEach(input => input.addEventListener('input', calculateStorage));
+        exportBtn.addEventListener('click', exportResults);
+
+        formatBtns.forEach(btn => {
             btn.addEventListener('click', function() {
-                const target = this.dataset.target;
-                const size = parseFloat(this.dataset.size);
-                
-                // Update active state
                 this.parentElement.querySelectorAll('.format-btn').forEach(b => b.classList.remove('active'));
                 this.classList.add('active');
-                
-                // Update file size
-                fileSizes[target] = size;
+                fileSizes[this.dataset.target] = parseFloat(this.dataset.size);
                 calculateStorage();
             });
         });
-
-        // Handle duration sliders
-        document.getElementById('audio-duration').addEventListener('input', function() {
-            audioDuration = parseFloat(this.value);
-            updateDurationDisplay('audio', this.value);
-            calculateStorage();
-        });
-
-        document.getElementById('video-duration').addEventListener('input', function() {
-            videoDuration = parseFloat(this.value);
-            updateDurationDisplay('video', this.value);
-            calculateStorage();
-        });
-
-        // Handle multiplier buttons
-        document.querySelectorAll('.multiplier-btn').forEach(btn => {
+        
+        multiplierBtns.forEach(btn => {
             btn.addEventListener('click', function() {
-                document.querySelectorAll('.multiplier-btn').forEach(b => b.classList.remove('active'));
+                multiplierBtns.forEach(b => b.classList.remove('active'));
                 this.classList.add('active');
                 currentMultiplier = parseFloat(this.dataset.multiplier);
                 calculateStorage();
             });
         });
-
-        // Initialize duration displays
-        updateDurationDisplay('audio', '1');
-        updateDurationDisplay('video', '1');
         
-        // Initial calculation
+        sensitivityBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                sensitivityBtns.forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                handleSensitivityChange(this.dataset.level);
+            });
+        });
+
+        document.getElementById('audio-duration').addEventListener('input', function() {
+            audioDuration = parseFloat(this.value);
+            document.getElementById('audio-duration-display').textContent = `${audioDuration.toFixed(1)} hours`;
+            calculateStorage();
+        });
+
+        document.getElementById('video-duration').addEventListener('input', function() {
+            videoDuration = parseFloat(this.value);
+            document.getElementById('video-duration-display').textContent = `${videoDuration.toFixed(1)} hours`;
+            calculateStorage();
+        });
+        
+        document.getElementById('project-duration').addEventListener('input', function() {
+            projectDuration = parseInt(this.value);
+            const display = projectDuration === 10 ? '10+ Years' : `${projectDuration} Years`;
+            document.getElementById('project-duration-display').textContent = display;
+            calculateStorage();
+        });
+        
+        document.getElementById('collaborators').addEventListener('input', function() {
+            const num = parseInt(this.value) || 1;
+            const advisory = document.getElementById('collaboration-advisory');
+            if (num > 1) {
+                advisory.textContent = 'Recommendation: Use Lakehead MS Teams or OneDrive for collaborative work and version control.';
+            } else {
+                advisory.textContent = '';
+            }
+        });
+
+        // --- INITIALIZATION ---
+        handleSensitivityChange('internal'); // Set initial state
         calculateStorage();
     </script>
 </body>
