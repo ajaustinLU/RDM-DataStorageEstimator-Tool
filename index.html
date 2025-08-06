@@ -96,6 +96,11 @@
         .custom-input-container > div { flex: 1; }
         .custom-input-container label { font-size: 0.85em; color: var(--text-light); margin-bottom: 4px; display: block; }
 
+        /* Strategy Description Style */
+        #strategy-description { margin-top: 20px; padding: 15px; background-color: var(--light-bg); border-radius: 12px; border: 1px solid var(--border-color); }
+        #strategy-description h4 { font-size: 1em; color: var(--text-dark); margin-bottom: 8px; }
+        #strategy-description p { font-size: 0.9em; color: var(--text-light); line-height: 1.5; }
+
     </style>
 </head>
 <body>
@@ -145,6 +150,7 @@
                         <div class="planning-btn multiplier-btn" data-multiplier="4"><span class="main-text">Versioning</span><span class="sub-text">+ Versions</span></div>
                         <div class="planning-btn multiplier-btn" data-multiplier="7"><span class="main-text">Enterprise</span><span class="sub-text">Redundant</span></div>
                     </div>
+                    <div id="strategy-description"></div>
                 </div>
             </div>
 
@@ -230,6 +236,13 @@
                 'custom': { label: 'Custom Data', type: 'custom' }
             }
         }
+    };
+
+    const strategyDescriptions = {
+        1: { title: "Raw (1x)", text: "Only one copy of the data exists. This is not recommended for most research as it offers no protection against data loss or corruption." },
+        3: { title: "Standard (3x)", text: "Follows the 3-2-1 backup rule: 3 copies of your data, on 2 different media, with 1 copy off-site. This is the recommended minimum for all research data." },
+        4: { title: "Versioning (4x)", text: "Includes the Standard backup plus extra space for versioning, allowing you to revert to previous versions of files. Ideal for projects with frequent edits and collaborative work." },
+        7: { title: "Enterprise (7x)", text: "For highly critical or sensitive data. This includes full redundancy, multiple off-site copies, and potentially real-time replication for maximum data protection and availability." }
     };
 
     let chart;
@@ -423,6 +436,16 @@
             warningDiv.innerHTML = '';
         }
     }
+
+    function updateStrategyDescription(multiplier) {
+        const descriptionBox = document.getElementById('strategy-description');
+        const description = strategyDescriptions[multiplier];
+        if (description) {
+            descriptionBox.innerHTML = `<h4>${description.title}</h4><p>${description.text}</p>`;
+        } else {
+            descriptionBox.innerHTML = '';
+        }
+    }
     
     // --- EVENT HANDLERS ---
     function setupEventListeners() {
@@ -461,6 +484,7 @@
                 document.querySelectorAll('.multiplier-btn').forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
                 state.multiplier = parseFloat(btn.dataset.multiplier);
+                updateStrategyDescription(state.multiplier);
                 calculateAndRender();
             }
         });
@@ -522,6 +546,7 @@
     document.addEventListener('DOMContentLoaded', () => {
         generateAccordions();
         setupEventListeners();
+        updateStrategyDescription(state.multiplier);
         calculateAndRender();
     });
     </script>
