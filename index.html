@@ -203,8 +203,8 @@
         "🎬 Audio & Video Media": {
             color: 'rgb(200,30,35)',
             files: {
-                'audio_standard': { label: 'Audio Recordings', type: 'format-duration', durationId: 'audio-duration', options: {'WAV 16-bit': 635, 'MP3 320k': 144, 'WAV 24-bit': 2073} },
-                'video': { label: 'Video Recordings', type: 'format-duration', durationId: 'video-duration', options: {'1080p Med': 3600, '1080p High': 7200, '4K Med': 14400, '4K High': 28800} }
+                'audio_standard': { label: 'Audio Recordings', type: 'format-minutes', options: {'WAV 16-bit': 635, 'MP3 320k': 144, 'WAV 24-bit': 2073} },
+                'video': { label: 'Video Recordings', type: 'format-minutes', options: {'1080p Med': 3600, '1080p High': 7200, '4K Med': 14400, '4K High': 28800} }
             }
         },
         "🖼️ Specialized Imaging": {
@@ -247,7 +247,6 @@
     let state = {
         fileSizes: {},
         inputs: {},
-        durations: { 'audio-duration': 1.0, 'video-duration': 1.0 },
         multiplier: 3,
         activeDuration: 3,
         archivalDuration: 7
@@ -284,7 +283,7 @@
             inputsHtml += `<div class="input-group" data-file-id="${id}">`;
             inputsHtml += `<div class="input-label">${file.label} ${tooltipHtml}</div>`;
             
-            if (file.type === 'format' || file.type === 'format-duration') {
+            if (file.type === 'format' || file.type === 'format-minutes') {
                 const firstOption = Object.keys(file.options)[0];
                 state.fileSizes[id] = file.options[firstOption];
                 inputsHtml += `<div class="format-options" data-target-id="${id}">`;
@@ -296,17 +295,21 @@
                  state.fileSizes[id] = file.size;
             }
 
-            if (file.type === 'format-duration') {
+            if (file.type === 'format-minutes') {
                 inputsHtml += `
-                    <div class="duration-control">
-                        <label>Avg Duration</label>
-                        <input type="range" id="${file.durationId}" min="0.25" max="8" step="0.25" value="1">
-                        <div class="duration-display" id="${file.durationId}-display">1.0 hours</div>
+                    <div class="custom-input-container">
+                        <div>
+                            <label for="${id}">Number of Recordings</label>
+                            <div class="input-field"><input type="number" id="${id}" min="0" value="0" placeholder="e.g., 10"></div>
+                        </div>
+                        <div>
+                            <label for="${id}_minutes">Avg. Duration (minutes)</label>
+                            <div class="input-field"><input type="number" id="${id}_minutes" min="0" value="60" placeholder="e.g., 60"></div>
+                        </div>
                     </div>
                 `;
-            }
-
-            if (file.type === 'custom') {
+                state.inputs[id + '_minutes'] = 60;
+            } else if (file.type === 'custom') {
                  inputsHtml += `<div class="input-description">Enter number of files and average size per file.</div>`;
                  inputsHtml += `
                     <div class="custom-input-container">
@@ -344,8 +347,9 @@
                 let sizeMB = count * state.fileSizes[id];
                 const fileDef = findFileDef(id);
 
-                if (fileDef && fileDef.type === 'format-duration') {
-                    sizeMB *= state.durations[fileDef.durationId];
+                if (fileDef && fileDef.type === 'format-minutes') {
+                    const minutes = state.inputs[id + '_minutes'] || 0;
+                    sizeMB *= (minutes / 60);
                 }
                 
                 totalMB += sizeMB;
@@ -460,17 +464,12 @@
 
         document.querySelector('.accordion-set').addEventListener('input', (e) => {
             const id = e.target.id;
-            if (id.includes('-duration')) { // Duration sliders
-                state.durations[id] = parseFloat(e.target.value);
-                document.getElementById(`${id}-display`).textContent = `${state.durations[id].toFixed(1)} hours`;
-            } else { // Number inputs
-                state.inputs[id] = parseFloat(e.target.value) || 0;
-                const fileId = e.target.closest('.input-group').dataset.fileId;
-                if (fileId) {
-                    const header = e.target.closest('.accordion-panel').previousElementSibling;
-                    header.classList.add('glow');
-                    setTimeout(() => header.classList.remove('glow'), 1000);
-                }
+            state.inputs[id] = parseFloat(e.target.value) || 0;
+            const fileId = e.target.closest('.input-group').dataset.fileId;
+            if (fileId) {
+                const header = e.target.closest('.accordion-panel').previousElementSibling;
+                header.classList.add('glow');
+                setTimeout(() => header.classList.remove('glow'), 1000);
             }
             calculateAndRender();
         });
@@ -510,7 +509,7 @@
         body += `Long-Term Archival Storage: ${document.getElementById('archival-storage').textContent}\n\n`;
         body += "--- FILE BREAKDOWN ---\n";
         for (const [id, count] of Object.entries(state.inputs)) {
-            if (count > 0 && id !== 'custom_size') {
+            if (count > 0 && id !== 'custom_size' && !id.endsWith('_minutes')) {
                 const label = findFileDef(id)?.label || id;
                 body += `- ${label}: ${count} units\n`;
             }
