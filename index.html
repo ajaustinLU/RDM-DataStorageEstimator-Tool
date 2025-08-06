@@ -98,6 +98,12 @@
         .format-btn:hover { background: #e9ecef; border-color: #adb5bd; }
         .format-btn.active { background: var(--lu-blue); color: white; border-color: var(--lu-blue); font-weight: 700; box-shadow: 0 4px 10px rgba(0, 65, 125, 0.3); transform: translateY(-2px); }
 
+        .planning-btn { background: white; border: 2px solid var(--border-color); border-radius: 12px; padding: 15px 10px; text-align: center; cursor: pointer; transition: all 0.3s ease; font-weight: 600; font-size: 0.9em; }
+        .planning-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+        .planning-btn.active { background: var(--lu-blue); color: white; border-color: var(--lu-blue); transform: translateY(-2px); box-shadow: 0 6px 25px rgba(0, 65, 125, 0.3); }
+        .planning-btn .main-text, .multiplier-btn .main-text { display: block; font-size: 1em; }
+        .planning-btn .sub-text, .multiplier-btn .sub-text { display: block; font-size: 0.75em; opacity: 0.7; margin-top: 4px; }
+
     </style>
 </head>
 <body>
@@ -113,7 +119,7 @@
 
                 <div class="planning-section">
                     <h3>✅ Project Setup</h3>
-                    <p>Define your project's lifecycle, security, and collaborative needs.</p>
+                    <p>Define your project's lifecycle and collaborative needs.</p>
                     <div class="planning-grid">
                         <div class="generic-slider-control">
                             <label>Active Research Phase</label>
@@ -125,15 +131,6 @@
                             <input type="range" id="archival-duration" min="7" max="20" step="1" value="7">
                             <div class="generic-slider-display" id="archival-duration-display">7 Years</div>
                             <p class="policy-note">Minimum 7 years as per LUFA agreement.</p>
-                        </div>
-                        <div style="grid-column: 1 / -1;">
-                            <label class="input-label" style="font-size: 0.9em; font-weight:600; margin-bottom: 8px;">Data Sensitivity Level</label>
-                            <div class="planning-grid" id="sensitivity-selector" style="grid-template-columns: repeat(4, 1fr);">
-                                <div class="planning-btn" data-level="public"><span class="main-text">Public</span></div>
-                                <div class="planning-btn active" data-level="internal"><span class="main-text">Internal</span></div>
-                                <div class="planning-btn" data-level="confidential"><span class="main-text">Confidential</span></div>
-                                <div class="planning-btn" data-level="restricted"><span class="main-text">Restricted</span></div>
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -278,8 +275,7 @@
         durations: { 'audio-duration': 1.0, 'video-duration': 1.0 },
         multiplier: 3,
         activeDuration: 3,
-        archivalDuration: 7,
-        sensitivity: 'internal'
+        archivalDuration: 7
     };
 
     // --- DOM GENERATION ---
@@ -512,24 +508,6 @@
             }
         });
         
-        document.getElementById('sensitivity-selector').addEventListener('click', (e) => {
-            const btn = e.target.closest('.planning-btn');
-            if (btn) {
-                document.querySelectorAll('#sensitivity-selector .planning-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                state.sensitivity = btn.dataset.level;
-                // Auto-adjust multiplier
-                let suggestedMultiplier = 3;
-                if (state.sensitivity === 'confidential') suggestedMultiplier = 4;
-                if (state.sensitivity === 'restricted') suggestedMultiplier = 7;
-                document.querySelectorAll('.multiplier-btn').forEach(b => {
-                    b.classList.toggle('active', parseFloat(b.dataset.multiplier) === suggestedMultiplier);
-                });
-                state.multiplier = suggestedMultiplier;
-                calculateAndRender();
-            }
-        });
-
         ['active-duration', 'archival-duration'].forEach(id => {
             document.getElementById(id).addEventListener('input', e => {
                 const value = parseInt(e.target.value);
@@ -553,7 +531,6 @@
         const subject = "Research Data Storage Consultation Request";
         let body = "Hello Research Data Management Team,\n\nI am planning a new research project and have used the storage calculator to estimate my needs. Please see the summary below.\n\n";
         body += "--- PROJECT SUMMARY ---\n";
-        body += `Sensitivity Level: ${state.sensitivity}\n`;
         body += `Active Phase: ${state.activeDuration} years\n`;
         body += `Archival Phase: ${state.archivalDuration} years\n\n`;
         body += "--- STORAGE ESTIMATE ---\n";
