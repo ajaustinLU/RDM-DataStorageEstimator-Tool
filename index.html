@@ -142,7 +142,7 @@
 
                 <div class="planning-section">
                     <h3>🎯 Storage Strategy</h3>
-                    <p>Select a multiplier to account for backups and versioning.</p>
+                    <p>Select a multiplier to account for backups and versioning. This multiplies your 'Base Data Size' to calculate the 'Total Active Storage', ensuring space for redundant copies and project growth.</p>
                     <div class="planning-grid" id="multiplier-selector" style="grid-template-columns: repeat(4, 1fr);">
                         <div class="planning-btn multiplier-btn" data-multiplier="1"><span class="main-text">Raw</span><span class="sub-text">1 copy</span></div>
                         <div class="planning-btn multiplier-btn active" data-multiplier="3"><span class="main-text">Standard</span><span class="sub-text">3-2-1</span></div>
@@ -160,6 +160,7 @@
                 </div>
                 <div class="secondary-results">
                     <div class="result-item"><span class="label">Base Data Size</span><span class="value" id="base-storage">0 GB</span></div>
+                    <div class="result-item"><span class="label">Strategy Multiplier</span><span class="value" id="storage-strategy">3x (Standard)</span></div>
                     <div class="result-item"><span class="label">Long-Term Archival</span><span class="value" id="archival-storage">0 GB</span></div>
                 </div>
                 
@@ -376,6 +377,10 @@
         document.getElementById('total-storage').textContent = totalGB < 1024 ? `${totalGB.toFixed(1)} GB` : `${(totalGB/1024).toFixed(2)} TB`;
         document.getElementById('archival-storage').textContent = `${archivalGB.toFixed(1)} GB`;
         
+        const activeBtn = document.querySelector('#multiplier-selector .multiplier-btn.active');
+        const strategyName = activeBtn ? activeBtn.querySelector('.main-text').textContent : 'N/A';
+        document.getElementById('storage-strategy').textContent = `${state.multiplier}x (${strategyName})`;
+
         updateTierGauge(totalGB / 1024);
         updateChart(contributions);
         updateWarnings(totalGB);
@@ -505,7 +510,10 @@
         body += `Archival Phase: ${state.archivalDuration} years\n\n`;
         body += "--- STORAGE ESTIMATE ---\n";
         body += `Base Data Size: ${document.getElementById('base-storage').textContent}\n`;
-        body += `Active Storage (with ${state.multiplier}x multiplier): ${document.getElementById('total-storage').textContent}\n`;
+        const activeBtn = document.querySelector('#multiplier-selector .multiplier-btn.active');
+        const strategyName = activeBtn ? activeBtn.querySelector('.main-text').textContent : 'N/A';
+        body += `Storage Strategy: ${state.multiplier}x (${strategyName})\n`;
+        body += `Total Active Storage: ${document.getElementById('total-storage').textContent}\n`;
         body += `Long-Term Archival Storage: ${document.getElementById('archival-storage').textContent}\n\n`;
         body += "--- FILE BREAKDOWN ---\n";
         for (const [id, count] of Object.entries(state.inputs)) {
