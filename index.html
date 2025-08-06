@@ -4,79 +4,100 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lakehead University Research Storage Calculator</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
+        :root {
+            --lu-blue: rgb(0,65,125);
+            --lu-yellow: rgb(255,195,15);
+            --lu-red: rgb(200,30,35);
+            --light-bg: #f8f9fa;
+            --text-dark: #2c3e50;
+            --text-light: #6c757d;
+            --border-color: #e2e8f0;
+        }
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
-        .storage-calculator { max-width: 1400px; margin: 0 auto; padding: 20px; background: linear-gradient(135deg, rgb(0,65,125) 0%, rgb(0,85,145) 100%); min-height: 100vh; }
+        body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #f0f2f5; }
+        .storage-calculator { max-width: 1400px; margin: 0 auto; padding: 20px; background: linear-gradient(135deg, var(--lu-blue) 0%, rgb(0,85,145) 100%); min-height: 100vh; }
         .header { text-align: center; color: white; margin-bottom: 20px; }
         .header h1 { font-size: 2.5em; font-weight: 700; margin-bottom: 10px; text-shadow: 0 2px 4px rgba(0,0,0,0.3); }
         .header .sub-header { font-size: 1.5em; font-weight: 500; opacity: 0.9; }
         .header p { font-size: 1.1em; opacity: 0.9; max-width: 700px; margin: 10px auto 0; }
-        .main-container { display: grid; grid-template-columns: 1fr 400px; gap: 30px; align-items: start; }
+        .main-container { display: grid; grid-template-columns: 1fr 420px; gap: 30px; align-items: start; }
         @media (max-width: 1024px) { .main-container { grid-template-columns: 1fr; } }
         .calculator-panel, .results-panel { background: white; border-radius: 20px; padding: 30px; box-shadow: 0 20px 60px rgba(0,0,0,0.1); }
         .results-panel { position: sticky; top: 20px; }
-        .section-header { display: flex; align-items: center; gap: 12px; margin-bottom: 25px; padding-bottom: 15px; border-bottom: 2px solid #f0f0f0; }
-        .section-header h2 { font-size: 1.5em; color: #2c3e50; font-weight: 600; }
-        .file-categories { display: grid; gap: 25px; }
-        .category { background: #f8f9fa; border-radius: 16px; padding: 20px; border-left: 4px solid; transition: all 0.3s ease; }
-        .category:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,0,0,0.1); }
-        .category.audio { border-left-color: rgb(200,30,35); }
-        .category.visual { border-left-color: rgb(255,195,15); }
-        .category.data { border-left-color: rgb(0,65,125); }
-        .category.documents { border-left-color: rgb(200,30,35); }
-        .category.specialized { border-left-color: rgb(0,65,125); }
-        .category.hpc { border-left-color: rgb(200,30,35); }
-        .category.genomics { border-left-color: rgb(255,195,15); }
-        .category.software { border-left-color: rgb(0,65,125); }
-        .category-title { font-size: 1.2em; font-weight: 600; color: #2c3e50; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; }
+        .section-header { display: flex; align-items: center; gap: 12px; margin-bottom: 25px; padding-bottom: 15px; border-bottom: 2px solid var(--border-color); }
+        .section-header h2 { font-size: 1.5em; color: var(--text-dark); font-weight: 600; }
         .file-inputs { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px; }
         .input-group { background: white; border-radius: 12px; padding: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); transition: all 0.3s ease; }
         .input-group:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
-        .input-group.has-options { padding-bottom: 5px; }
-        .input-label { font-weight: 600; color: #2c3e50; margin-bottom: 4px; font-size: 0.95em; }
-        .input-description { font-size: 0.8em; color: #7f8c8d; margin-bottom: 8px; }
-        .input-field { position: relative; margin-bottom: 10px; }
-        .input-field input { width: 100%; padding: 12px 15px; border: 2px solid #e9ecef; border-radius: 8px; font-size: 16px; transition: all 0.3s ease; background: #fff; }
-        .input-field input:focus { outline: none; border-color: rgb(255,195,15); box-shadow: 0 0 0 3px rgba(255, 195, 15, 0.1); }
-        .input-field input:not([value="0"]):not([value=""]) { border-color: rgb(0,65,125); background: rgb(248,252,255); }
-        .format-options { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 6px; margin-bottom: 8px; }
-        .format-btn { background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 6px; padding: 6px 10px; text-align: center; cursor: pointer; font-size: 0.8em; font-weight: 500; transition: all 0.2s ease; }
-        .format-btn:hover { background: #e9ecef; }
-        .format-btn.active { background: rgb(0,65,125); color: white; border-color: rgb(0,65,125); }
-        .duration-control, .generic-slider-control { margin-bottom: 10px; }
-        .duration-control label, .generic-slider-control label { font-size: 0.85em; color: #6c757d; margin-bottom: 4px; display: block; }
-        .duration-control input[type="range"], .generic-slider-control input[type="range"] { width: 100%; margin-bottom: 4px; }
-        .duration-display, .generic-slider-display { text-align: center; font-size: 0.8em; color: rgb(0,65,125); font-weight: 600; }
-        .planning-section { background: linear-gradient(135deg, rgba(0,65,125,0.1) 0%, rgba(0,85,145,0.05) 100%); border: 2px solid rgba(0,65,125,0.2); border-radius: 16px; padding: 25px; margin: 25px 0; }
-        .planning-section h3 { color: #2c3e50; margin-bottom: 10px; font-size: 1.3em; }
-        .planning-section p { color: #2c3e50; margin-bottom: 20px; opacity: 0.8; }
-        .planning-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; }
-        .planning-btn { background: white; border: 2px solid #ddd; border-radius: 12px; padding: 15px 10px; text-align: center; cursor: pointer; transition: all 0.3s ease; font-weight: 600; font-size: 0.9em; }
-        .planning-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
-        .planning-btn.active { background: rgb(0,65,125); color: white; border-color: rgb(0,65,125); transform: translateY(-2px); box-shadow: 0 6px 25px rgba(0, 65, 125, 0.3); }
-        .planning-btn .main-text, .multiplier-btn .main-text { display: block; font-size: 1em; }
-        .planning-btn .sub-text, .multiplier-btn .sub-text { display: block; font-size: 0.75em; opacity: 0.7; margin-top: 4px; }
-        #sensitivity-advisory { margin-top: 15px; padding: 15px; border-radius: 12px; font-size: 0.9em; display: none; }
-        #sensitivity-advisory.public { background: #e8f5e9; color: #2e7d32; border: 2px solid #a5d6a7; }
-        #sensitivity-advisory.internal { background: #e3f2fd; color: #1565c0; border: 2px solid #90caf9; }
-        #sensitivity-advisory.confidential { background: #fff3e0; color: #ef6c00; border: 2px solid #ffcc80; }
-        #sensitivity-advisory.restricted { background: #ffebee; color: #c62828; border: 2px solid #ef9a9a; }
-        #sensitivity-advisory a { color: inherit; font-weight: 600; text-decoration: underline; }
-        .results-header { text-align: center; margin-bottom: 25px; }
-        .results-header h2 { color: #2c3e50; font-size: 1.8em; margin-bottom: 8px; }
-        .primary-result { background: linear-gradient(135deg, rgb(0,65,125) 0%, rgb(0,85,145) 100%); color: white; text-align: center; padding: 25px; border-radius: 16px; margin-bottom: 20px; }
-        .primary-result .label { font-size: 0.9em; opacity: 0.9; margin-bottom: 5px; }
-        .primary-result .value { font-size: 2.5em; font-weight: 700; margin-bottom: 10px; }
-        .secondary-results { display: grid; gap: 12px; }
-        .result-item { background: #f8f9fa; padding: 15px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; }
-        .result-item .label { color: #6c757d; font-size: 0.9em; }
-        .result-item .value { font-weight: 600; color: #2c3e50; }
+        .input-label { font-weight: 600; color: var(--text-dark); margin-bottom: 4px; font-size: 0.95em; display:flex; align-items:center; gap: 5px; }
+        .input-description { font-size: 0.8em; color: var(--text-light); margin-bottom: 8px; }
+        .input-field input { width: 100%; padding: 12px 15px; border: 2px solid var(--border-color); border-radius: 8px; font-size: 16px; transition: all 0.3s ease; background: #fff; }
+        .input-field input:focus { outline: none; border-color: var(--lu-yellow); box-shadow: 0 0 0 3px rgba(255, 195, 15, 0.1); }
+        .planning-section { background: linear-gradient(135deg, rgba(0,65,125,0.05) 0%, rgba(0,85,145,0.02) 100%); border: 1px solid var(--border-color); border-radius: 16px; padding: 25px; margin: 25px 0; }
+        .planning-section h3 { color: var(--text-dark); margin-bottom: 10px; font-size: 1.3em; }
+        .planning-section p { color: var(--text-dark); margin-bottom: 20px; opacity: 0.8; }
+        .planning-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .generic-slider-control { margin-bottom: 5px; }
+        .generic-slider-control label { font-size: 0.9em; color: var(--text-dark); margin-bottom: 8px; display: block; font-weight:600; }
+        .generic-slider-display { text-align: center; font-size: 0.9em; color: var(--lu-blue); font-weight: 600; margin-top: 5px; }
+        .policy-note { font-size: 0.8em; color: var(--text-light); text-align: center; margin-top: 8px; }
+        .results-header { text-align: center; margin-bottom: 20px; }
+        .results-header h2 { color: var(--text-dark); font-size: 1.75em; font-weight: 700; }
+        .primary-result { background: linear-gradient(135deg, var(--lu-blue) 0%, rgb(0,85,145) 100%); color: white; text-align: center; padding: 25px 20px; border-radius: 16px; margin-bottom: 15px; }
+        .primary-result .label { font-size: 1em; opacity: 0.9; margin-bottom: 8px; font-weight: 500; }
+        .primary-result .value { font-size: 2.8em; font-weight: 700; line-height: 1.1; }
+        .secondary-results { display: grid; gap: 10px; margin-bottom: 20px; }
+        .result-item { background: var(--light-bg); padding: 15px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; border: 1px solid var(--border-color); }
+        .result-item .label { color: var(--text-light); font-size: 0.9em; }
+        .result-item .value { font-weight: 600; color: var(--text-dark); font-size: 1.05em; }
         .warning-message { margin-top: 20px; padding: 15px; border-radius: 12px; font-weight: 600; text-align: center; }
-        .warning-high { background: rgba(255,195,15,0.1); color: rgb(0,65,125); border: 2px solid rgba(255,195,15,0.5); }
-        .warning-critical { background: rgba(200,30,35,0.1); color: rgb(200,30,35); border: 2px solid rgba(200,30,35,0.3); }
-        .export-btn { background: rgb(255,195,15); color: rgb(0,65,125); border: none; padding: 12px 24px; border-radius: 25px; cursor: pointer; font-weight: 700; font-size:1em; margin: 20px auto 0; display: block; transition: all 0.3s ease; }
-        .export-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 20px rgba(0,0,0,0.2); }
+        .warning-high { background: rgba(255,195,15,0.1); color: var(--lu-blue); border: 2px solid rgba(255,195,15,0.5); }
+        .warning-critical { background: rgba(200,30,35,0.1); color: var(--lu-red); border: 2px solid rgba(200,30,35,0.3); }
+        .action-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 25px; }
+        .action-btn { background: var(--lu-yellow); color: var(--lu-blue); border: 2px solid var(--lu-yellow); padding: 12px; border-radius: 12px; cursor: pointer; font-weight: 700; font-size: 1em; text-align:center; transition: all 0.3s ease; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .action-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 20px rgba(255,195,15,0.4); }
+        .action-btn.secondary { background: #fff; color: var(--text-dark); border-color: var(--border-color); }
+        .action-btn.secondary:hover { background: var(--light-bg); border-color: #adb5bd; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        
+        /* Accordion Styles */
+        .accordion-set { display: grid; gap: 10px; }
+        .accordion-header { background-color: var(--light-bg); color: var(--text-dark); cursor: pointer; padding: 18px; width: 100%; border: none; text-align: left; outline: none; font-size: 1.2em; font-weight: 600; transition: all 0.3s ease; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid var(--lu-blue); }
+        .accordion-header:hover, .accordion-header.active { background-color: #e2e8f0; }
+        .accordion-header.glow { animation: glow 1s ease-out; }
+        @keyframes glow { 0% { box-shadow: 0 0 0px var(--lu-yellow); } 50% { box-shadow: 0 0 10px 3px var(--lu-yellow); } 100% { box-shadow: 0 0 0px var(--lu-yellow); } }
+        .accordion-header .icon { transition: transform 0.3s ease; }
+        .accordion-header.active .icon { transform: rotate(180deg); }
+        .accordion-panel { padding: 0 18px; background-color: white; max-height: 0; overflow: hidden; transition: max-height 0.4s ease-out; border-radius: 0 0 12px 12px; border: 1px solid var(--border-color); border-top: none; }
+        .accordion-panel-content { padding: 20px 0; }
+
+        /* Tooltip Styles */
+        .tooltip-trigger { cursor: help; border-bottom: 1px dotted var(--text-light); position: relative; }
+        .tooltip-trigger .tooltip-text { visibility: hidden; width: 220px; background-color: var(--text-dark); color: #fff; text-align: center; border-radius: 6px; padding: 10px; position: absolute; z-index: 10; bottom: 130%; left: 50%; margin-left: -110px; opacity: 0; transition: opacity 0.3s; font-size: 0.85em; font-weight: 400; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+        .tooltip-trigger:hover .tooltip-text { visibility: visible; opacity: 1; }
+
+        /* Chart & Gauge Styles */
+        .results-visuals { display: flex; gap: 20px; margin-top: 20px; align-items: flex-start; }
+        #chart-container { flex: 1; min-width: 0; }
+        #tier-gauge-container { width: 80px; text-align: center; }
+        #tier-gauge-container h4 { font-size: 0.9em; color: var(--text-dark); margin-bottom: 10px; }
+        .tier-gauge { position: relative; width: 30px; height: 200px; background: var(--border-color); border-radius: 15px; margin: 0 auto; }
+        .tier-gauge-fill { position: absolute; bottom: 0; width: 100%; background: linear-gradient(to top, var(--lu-yellow), var(--lu-red)); border-radius: 15px; transition: height 0.5s ease-out; }
+        .tier-labels { position: relative; height: 200px; width: 40px; }
+        .tier-label { position: absolute; right: 0; transform: translateX(100%); font-size: 0.7em; color: var(--text-light); }
+        
+        /* Cost Section */
+        #cost-section { margin-top: 20px; background: var(--light-bg); padding: 15px; border-radius: 12px; display: none; border: 1px solid var(--border-color); }
+        #cost-section h4 { text-align: center; margin-bottom: 10px; color: var(--text-dark); }
+        #cost-section p.disclaimer { font-size: 0.8em; text-align: center; color: var(--text-light); margin-top: 10px; }
+        
+        /* Enhanced Button Selection */
+        .format-options { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 8px; margin-top: 10px; }
+        .format-btn { background: var(--light-bg); border: 2px solid var(--border-color); border-radius: 8px; padding: 8px 10px; text-align: center; cursor: pointer; font-size: 0.85em; font-weight: 500; transition: all 0.2s ease; }
+        .format-btn:hover { background: #e9ecef; border-color: #adb5bd; }
+        .format-btn.active { background: var(--lu-blue); color: white; border-color: var(--lu-blue); font-weight: 700; box-shadow: 0 4px 10px rgba(0, 65, 125, 0.3); transform: translateY(-2px); }
+
     </style>
 </head>
 <body>
@@ -84,7 +105,7 @@
         <div class="header">
             <h1>🗄️ Research Storage Calculator</h1>
             <div class="sub-header">for Lakehead University</div>
-            <p>A comprehensive tool for precision storage planning. Estimate your project's data needs based on file types, security level, and project duration.</p>
+            <p>An interactive tool for precision storage planning, cost estimation, and direct consultation for your research project.</p>
         </div>
 
         <div class="main-container">
@@ -92,32 +113,26 @@
 
                 <div class="planning-section">
                     <h3>✅ Project Setup</h3>
-                    <p>Start by defining the security level and duration of your research project.</p>
+                    <p>Define your project's lifecycle, security, and collaborative needs.</p>
                     <div class="planning-grid">
+                        <div class="generic-slider-control">
+                            <label>Active Research Phase</label>
+                            <input type="range" id="active-duration" min="1" max="10" step="1" value="3">
+                            <div class="generic-slider-display" id="active-duration-display">3 Years</div>
+                        </div>
+                        <div class="generic-slider-control">
+                            <label>Long-Term Archival</label>
+                            <input type="range" id="archival-duration" min="7" max="20" step="1" value="7">
+                            <div class="generic-slider-display" id="archival-duration-display">7 Years</div>
+                            <p class="policy-note">Minimum 7 years as per LUFA agreement.</p>
+                        </div>
                         <div style="grid-column: 1 / -1;">
-                            <label class="input-label">Data Sensitivity Level</label>
-                            <div class="planning-grid" id="sensitivity-selector">
+                            <label class="input-label" style="font-size: 0.9em; font-weight:600; margin-bottom: 8px;">Data Sensitivity Level</label>
+                            <div class="planning-grid" id="sensitivity-selector" style="grid-template-columns: repeat(4, 1fr);">
                                 <div class="planning-btn" data-level="public"><span class="main-text">Public</span></div>
                                 <div class="planning-btn active" data-level="internal"><span class="main-text">Internal</span></div>
                                 <div class="planning-btn" data-level="confidential"><span class="main-text">Confidential</span></div>
                                 <div class="planning-btn" data-level="restricted"><span class="main-text">Restricted</span></div>
-                            </div>
-                            <div id="sensitivity-advisory"></div>
-                        </div>
-                        <div style="grid-column: 1 / -1;">
-                            <div class="generic-slider-control">
-                                <label>Project Duration (Data Retention Period)</label>
-                                <input type="range" id="project-duration" min="1" max="10" step="1" value="5">
-                                <div class="generic-slider-display" id="project-duration-display">5 Years</div>
-                            </div>
-                        </div>
-                         <div style="grid-column: 1 / -1;">
-                            <div class="input-group">
-                                <div class="input-label">Number of Collaborators</div>
-                                <div class="input-field">
-                                     <input type="number" id="collaborators" min="1" value="1" placeholder="e.g., 3">
-                                </div>
-                                <div id="collaboration-advisory" class="input-description"></div>
                             </div>
                         </div>
                     </div>
@@ -128,121 +143,18 @@
                     <h2>File Requirements</h2>
                 </div>
 
-                <div class="file-categories">
-                    <div class="category audio">
-                        <div class="category-title">🎵 Audio Files</div>
-                        <div class="file-inputs">
-                            <div class="input-group has-options">
-                                <div class="input-label">Audio Recordings</div><div class="input-description">Choose format and duration</div>
-                                <div class="format-options">
-                                    <div class="format-btn active" data-target="audio_standard" data-size="635">WAV 16-bit</div>
-                                    <div class="format-btn" data-target="audio_standard" data-size="144">MP3 320k</div>
-                                    <div class="format-btn" data-target="audio_standard" data-size="2073">WAV 24-bit</div>
-                                </div>
-                                <div class="duration-control">
-                                    <label>Avg Duration</label><input type="range" id="audio-duration" min="0.25" max="8" step="0.25" value="1"><div class="duration-display" id="audio-duration-display">1.0 hours</div>
-                                </div>
-                                <div class="input-field"><input type="number" id="audio_standard" min="0" value="0" placeholder="Number of recordings"></div>
-                            </div>
-                             <div class="input-group"><div class="input-label">Compressed Voice</div><div class="input-description">M4A/AAC files ~60MB/hr</div><div class="input-field"><input type="number" id="audio_compressed" min="0" value="0" placeholder="Number of hours"></div></div>
-                             <div class="input-group"><div class="input-label">Transcripts</div><div class="input-description">Plain text ~0.1MB/hr</div><div class="input-field"><input type="number" id="transcripts" min="0" value="0" placeholder="Number of hours"></div></div>
-                        </div>
-                    </div>
-                    
-                    <div class="category visual">
-                        <div class="category-title">📹 Video & Images</div>
-                        <div class="file-inputs">
-                            <div class="input-group has-options">
-                                <div class="input-label">Video Recordings</div><div class="input-description">Select quality and duration</div>
-                                <div class="format-options">
-                                    <div class="format-btn active" data-target="video" data-size="3600">1080p Med</div><div class="format-btn" data-target="video" data-size="7200">1080p High</div><div class="format-btn" data-target="video" data-size="14400">4K Med</div><div class="format-btn" data-target="video" data-size="28800">4K High</div>
-                                </div>
-                                <div class="duration-control">
-                                    <label>Avg Duration</label><input type="range" id="video-duration" min="0.25" max="4" step="0.25" value="1"><div class="duration-display" id="video-duration-display">1.0 hours</div>
-                                </div>
-                                <div class="input-field"><input type="number" id="video" min="0" value="0" placeholder="Number of recordings"></div>
-                            </div>
-                            <div class="input-group has-options">
-                                <div class="input-label">Research Photos</div><div class="input-description">Choose format</div>
-                                <div class="format-options">
-                                    <div class="format-btn active" data-target="photos" data-size="12">JPEG High</div><div class="format-btn" data-target="photos" data-size="35">RAW</div><div class="format-btn" data-target="photos" data-size="300">Microscopy</div>
-                                </div>
-                                <div class="input-field"><input type="number" id="photos" min="0" value="0" placeholder="Number of images"></div>
-                            </div>
-                             <div class="input-group"><div class="input-label">Confocal Microscopy</div><div class="input-description">Image stacks ~5GB avg</div><div class="input-field"><input type="number" id="img_confocal" min="0" value="0" placeholder="Number of stacks"></div></div>
-                             <div class="input-group"><div class="input-label">Digital Pathology</div><div class="input-description">Scanned slides ~2GB avg</div><div class="input-field"><input type="number" id="img_pathology" min="0" value="0" placeholder="Number of slides"></div></div>
-                        </div>
-                    </div>
-
-                    <div class="category data">
-                        <div class="category-title">📊 Data & Documents</div>
-                        <div class="file-inputs">
-                            <div class="input-group has-options">
-                                <div class="input-label">Spreadsheets (Excel/CSV)</div><div class="input-description">Select complexity</div>
-                                <div class="format-options">
-                                    <div class="format-btn active" data-target="excel" data-size="0.3">1K Basic</div><div class="format-btn" data-target="excel" data-size="2">1K Mixed</div><div class="format-btn" data-target="excel" data-size="10">10K Basic</div><div class="format-btn" data-target="excel" data-size="50">10K Complex</div>
-                                </div>
-                                <div class="input-field"><input type="number" id="excel" min="0" value="0" placeholder="Number of files"></div>
-                            </div>
-                            <div class="input-group has-options">
-                                <div class="input-label">PDF Documents</div><div class="input-description">Select document type</div>
-                                <div class="format-options">
-                                    <div class="format-btn active" data-target="pdfs" data-size="3">Text Heavy</div><div class="format-btn" data-target="pdfs" data-size="12">With Images</div><div class="format-btn" data-target="pdfs" data-size="120">Scanned</div>
-                                </div>
-                                <div class="input-field"><input type="number" id="pdfs" min="0" value="0" placeholder="Number of PDFs"></div>
-                            </div>
-                            <div class="input-group"><div class="input-label">Survey Data</div><div class="input-description">~2MB per 1000 responses</div><div class="input-field"><input type="number" id="survey" min="0" value="0" placeholder="Number of exports"></div></div>
-                            <div class="input-group"><div class="input-label">Word Documents</div><div class="input-description">Reports/papers ~2MB avg</div><div class="input-field"><input type="number" id="word-docs" min="0" value="0" placeholder="Number of documents"></div></div>
-                        </div>
-                    </div>
-                    
-                    <div class="category hpc">
-                        <div class="category-title">💨 HPC & Simulation</div>
-                        <div class="file-inputs">
-                            <div class="input-group"><div class="input-label">Simulation Checkpoints</div><div class="input-description">~5GB avg per file</div><div class="input-field"><input type="number" id="hpc_checkpoint" min="0" value="0" placeholder="Number of files"></div></div>
-                            <div class="input-group"><div class="input-label">Raw Simulation Output</div><div class="input-description">~50GB avg per run</div><div class="input-field"><input type="number" id="hpc_raw" min="0" value="0" placeholder="Number of runs"></div></div>
-                            <div class="input-group"><div class="input-label">Post-Processed Data</div><div class="input-description">~10GB avg per dataset</div><div class="input-field"><input type="number" id="hpc_processed" min="0" value="0" placeholder="Number of datasets"></div></div>
-                        </div>
-                    </div>
-                    
-                    <div class="category genomics">
-                        <div class="category-title">🧬 Genomics & Bioinformatics</div>
-                        <div class="file-inputs">
-                            <div class="input-group"><div class="input-label">Raw Sequencer Output (BCL)</div><div class="input-description">~400GB avg per run</div><div class="input-field"><input type="number" id="geno_bcl" min="0" value="0" placeholder="Number of runs"></div></div>
-                            <div class="input-group"><div class="input-label">Unaligned Reads (FASTQ)</div><div class="input-description">~30GB avg per sample</div><div class="input-field"><input type="number" id="geno_fastq" min="0" value="0" placeholder="Number of samples"></div></div>
-                            <div class="input-group"><div class="input-label">Aligned Data (BAM/SAM)</div><div class="input-description">~40GB avg per sample</div><div class="input-field"><input type="number" id="geno_bam" min="0" value="0" placeholder="Number of samples"></div></div>
-                            <div class="input-group"><div class="input-label">Variant Call Files (VCF)</div><div class="input-description">~1GB avg per sample</div><div class="input-field"><input type="number" id="geno_vcf" min="0" value="0" placeholder="Number of samples"></div></div>
-                        </div>
-                    </div>
-
-                    <div class="category specialized">
-                        <div class="category-title">🔬 Specialized & Custom Data</div>
-                        <div class="file-inputs">
-                            <div class="input-group"><div class="input-label">GIS/Mapping Data</div><div class="input-description">Shapefiles/rasters ~100MB avg</div><div class="input-field"><input type="number" id="gis-data" min="0" value="0" placeholder="Number of datasets"></div></div>
-                             <div class="input-group"><div class="input-label">LiDAR Geospatial Data</div><div class="input-description">Point clouds ~20GB avg</div><div class="input-field"><input type="number" id="gis_lidar" min="0" value="0" placeholder="Number of scans"></div></div>
-                             <div class="input-group"><div class="input-label">Digital Humanities Data</div><div class="input-description">Text corpora, 3D models ~5GB avg</div><div class="input-field"><input type="number" id="digital_humanities" min="0" value="0" placeholder="Number of collections"></div></div>
-                             <div class="input-group"><div class="input-label">Custom Data Type</div><div class="input-description">Enter size per file in MB</div><div class="input-field"><input type="number" id="custom_size" min="0" value="100" placeholder="Size in MB"></div><div class="input-field"><input type="number" id="custom_count" min="0" value="0" placeholder="Number of files"></div></div>
-                        </div>
-                    </div>
-                    
-                    <div class="category software">
-                        <div class="category-title">💾 Software & Project Files</div>
-                        <div class="file-inputs">
-                             <div class="input-group"><div class="input-label">Statistical Software</div><div class="input-description">SPSS/R/SAS ~15MB/1k cases</div><div class="input-field"><input type="number" id="stats-files" min="0" value="0" placeholder="Number of datasets"></div></div>
-                             <div class="input-group"><div class="input-label">NVivo Project Files</div><div class="input-description">Qualitative data ~1GB avg</div><div class="input-field"><input type="number" id="nvivo" min="0" value="0" placeholder="Number of projects"></div></div>
-                             <div class="input-group"><div class="input-label">MATLAB Workspace</div><div class="input-description">.mat files ~500MB avg</div><div class="input-field"><input type="number" id="matlab" min="0" value="0" placeholder="Number of workspaces"></div></div>
-                        </div>
-                    </div>
+                <div class="accordion-set">
+                    <!-- Categories will be dynamically generated by JS -->
                 </div>
 
                 <div class="planning-section">
                     <h3>🎯 Storage Strategy</h3>
-                    <p>Select a multiplier to account for backups, versioning, and growth. Your selection may be updated based on your data sensitivity level.</p>
-                    <div class="planning-grid" id="multiplier-selector">
-                        <div class="planning-btn multiplier-btn" data-multiplier="1"><span class="main-text">Raw Only</span><span class="sub-text">No redundancy</span></div>
-                        <div class="planning-btn multiplier-btn active" data-multiplier="3"><span class="main-text">Standard</span><span class="sub-text">3-2-1 Backup</span></div>
-                        <div class="planning-btn multiplier-btn" data-multiplier="4"><span class="main-text">Versioning</span><span class="sub-text">+ Multiple versions</span></div>
-                        <div class="planning-btn multiplier-btn" data-multiplier="7"><span class="main-text">Enterprise</span><span class="sub-text">Full redundancy</span></div>
+                    <p>Select a multiplier to account for backups and versioning. This may be adjusted based on your data sensitivity level.</p>
+                    <div class="planning-grid" id="multiplier-selector" style="grid-template-columns: repeat(4, 1fr);">
+                        <div class="planning-btn multiplier-btn" data-multiplier="1"><span class="main-text">Raw</span><span class="sub-text">1 copy</span></div>
+                        <div class="planning-btn multiplier-btn active" data-multiplier="3"><span class="main-text">Standard</span><span class="sub-text">3-2-1</span></div>
+                        <div class="planning-btn multiplier-btn" data-multiplier="4"><span class="main-text">Versioning</span><span class="sub-text">+ Versions</span></div>
+                        <div class="planning-btn multiplier-btn" data-multiplier="7"><span class="main-text">Enterprise</span><span class="sub-text">Redundant</span></div>
                     </div>
                 </div>
             </div>
@@ -252,275 +164,435 @@
                 <div class="primary-result">
                     <div class="label">Total Active Storage</div>
                     <div class="value" id="total-storage">0 GB</div>
-                    <div class="progress-bar"><div class="progress-fill" id="storage-progress"></div></div>
                 </div>
                 <div class="secondary-results">
                     <div class="result-item"><span class="label">Base Data Size</span><span class="value" id="base-storage">0 GB</span></div>
-                    <div class="result-item"><span class="label">Storage Multiplier</span><span class="value" id="current-multiplier">3x</span></div>
-                    <div class="result-item"><span class="label">Total in Terabytes</span><span class="value" id="total-tb">0.00 TB</span></div>
-                    <div class="result-item"><span class="label">Largest Component</span><span class="value" id="largest-contributor">None</span></div>
-                    <div class="result-item" style="background: #e3f2fd; border: 1px solid #90caf9;"><span class="label">Long-Term Archival</span><span class="value" id="archival-storage">0 GB</span></div>
+                    <div class="result-item"><span class="label">Long-Term Archival</span><span class="value" id="archival-storage">0 GB</span></div>
                 </div>
+                
+                <div class="results-visuals">
+                    <div id="chart-container">
+                        <canvas id="storage-chart"></canvas>
+                    </div>
+                    <div id="tier-gauge-container">
+                        <h4>Storage Tier</h4>
+                        <div style="display: flex; justify-content: center;">
+                            <div class="tier-gauge">
+                                <div id="tier-gauge-fill" class="tier-gauge-fill"></div>
+                            </div>
+                            <div class="tier-labels">
+                                <div class="tier-label" style="bottom: 95%;">Enterprise</div>
+                                <div class="tier-label" style="bottom: 60%;">Departmental</div>
+                                <div class="tier-label" style="bottom: 15%;">Personal</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <div id="warning-message"></div>
-                <button class="export-btn" id="export-btn">📋 Export Results for DMP</button>
+                
+                <div id="cost-section">
+                    <h4>Grant Planning Cost Estimate</h4>
+                    <div class="secondary-results">
+                        <div class="result-item"><span class="label">Est. Active Storage Cost</span><span class="value" id="active-cost">$0 / year</span></div>
+                        <div class="result-item"><span class="label">Est. Archival Storage Cost</span><span class="value" id="archival-cost">$0 / year</span></div>
+                    </div>
+                    <p class="disclaimer">Note: These figures are for planning purposes only and are not an official quote.</p>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="action-btn secondary" id="cost-toggle-btn">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                        Estimate Cost
+                    </button>
+                    <button class="action-btn" id="consult-btn">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.73 18a2.64 2.64 0 0 0-3.76 0L14 22H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v12.27Z"/><path d="M16 8h-6"/><path d="M16 12h-6"/></svg>
+                        Request Consultation
+                    </button>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
-        // --- DATA ---
-        const fileSizes = {
-            'audio_standard': 635, 'audio_compressed': 60, 'transcripts': 0.1,
-            'video': 3600, 'photos': 12, 'img_confocal': 5000, 'img_pathology': 2000,
-            'excel': 0.3, 'pdfs': 3, 'survey': 2, 'word-docs': 2,
-            'hpc_checkpoint': 5000, 'hpc_raw': 50000, 'hpc_processed': 10000,
-            'geno_bcl': 400000, 'geno_fastq': 30000, 'geno_bam': 40000, 'geno_vcf': 1000,
-            'gis-data': 100, 'gis_lidar': 20000, 'digital_humanities': 5000,
-            'stats-files': 15, 'nvivo': 1000, 'matlab': 500,
-            'custom': 100
-        };
+    // --- DATA & CONFIG ---
+    const fileCategories = {
+        "📄 General Documents & Data": {
+            color: 'rgb(0, 102, 179)',
+            files: {
+                'pdfs': { label: 'PDF Documents', type: 'format', options: {'Text Heavy': 3, 'With Images': 12, 'Scanned': 120} },
+                'word-docs': { label: 'Word Documents', size: 2, unit: 'documents' },
+                'transcripts': { label: 'Transcripts', size: 0.1, unit: 'hours of audio' },
+                'excel': { label: 'Spreadsheets (Excel/CSV)', type: 'format', options: {'1K Basic': 0.3, '1K Mixed': 2, '10K Basic': 10, '10K Complex': 50} },
+                'survey': { label: 'Survey Data', size: 2, unit: 'exports (1k resp.)' }
+            }
+        },
+        "🎬 Audio & Video Media": {
+            color: 'rgb(200,30,35)',
+            files: {
+                'audio_standard': { label: 'Audio Recordings', type: 'format-duration', durationId: 'audio-duration', options: {'WAV 16-bit': 635, 'MP3 320k': 144, 'WAV 24-bit': 2073} },
+                'video': { label: 'Video Recordings', type: 'format-duration', durationId: 'video-duration', options: {'1080p Med': 3600, '1080p High': 7200, '4K Med': 14400, '4K High': 28800} }
+            }
+        },
+        "🖼️ Specialized Imaging": {
+            color: 'rgb(255, 195, 15)',
+            files: {
+                'photos': { label: 'Research Photos', type: 'format', options: {'JPEG High': 12, 'RAW': 35, 'Microscopy': 300} },
+                'img_confocal': { label: 'Confocal Microscopy', size: 5000, unit: 'stacks', tooltip: 'Layered 3D images from a confocal microscope, often large.' },
+                'img_pathology': { label: 'Digital Pathology', size: 2000, unit: 'scanned slides', tooltip: 'High-resolution scans of entire microscope slides.' }
+            }
+        },
+        "🔬 Discipline-Specific & Software Files": {
+            color: 'rgb(0, 133, 63)',
+            files: {
+                'stats-files': { label: 'Statistical Software', size: 15, unit: 'datasets (1k cases)' },
+                'nvivo': { label: 'NVivo Project Files', size: 1000, unit: 'projects', tooltip: 'Qualitative data analysis projects containing text, audio, and video.' },
+                'matlab': { label: 'MATLAB Workspace', size: 500, unit: 'workspaces' },
+                'gis-data': { label: 'GIS/Mapping Data', size: 100, unit: 'datasets' },
+                'gis_lidar': { label: 'LiDAR Geospatial Data', size: 20000, unit: 'scans', tooltip: '3D point cloud data from laser scanning, common in geography.' }
+            }
+        },
+        "💨 High-Performance & Genomics Data": {
+            color: 'rgb(106, 76, 156)',
+            files: {
+                'hpc_raw': { label: 'Raw Simulation Output', size: 50000, unit: 'runs' },
+                'geno_fastq': { label: 'Unaligned Reads (FASTQ)', size: 30000, unit: 'samples', tooltip: 'Raw DNA/RNA sequence data from a sequencer.' },
+                'geno_bam': { label: 'Aligned Data (BAM/SAM)', size: 40000, unit: 'samples', tooltip: 'Sequence data after alignment to a reference genome.' }
+            }
+        },
+        "⚙️ Custom Data Type": {
+            color: 'rgb(108, 117, 125)',
+            files: {
+                'custom': { label: 'Custom Data', type: 'custom' }
+            }
+        }
+    };
 
-        const fileLabels = {
-            'audio_standard': 'Audio Recordings', 'audio_compressed': 'Compressed Audio', 'transcripts': 'Transcripts',
-            'video': 'Video Recordings', 'photos': 'Photos/Images', 'img_confocal': 'Confocal Microscopy', 'img_pathology': 'Digital Pathology',
-            'excel': 'Spreadsheets', 'pdfs': 'PDF Documents', 'survey': 'Survey Data', 'word-docs': 'Word Documents',
-            'hpc_checkpoint': 'HPC Checkpoints', 'hpc_raw': 'HPC Raw Output', 'hpc_processed': 'HPC Processed Data',
-            'geno_bcl': 'Raw Sequencer Output', 'geno_fastq': 'FASTQ Reads', 'geno_bam': 'Aligned BAM/SAM', 'geno_vcf': 'Variant Call Files',
-            'gis-data': 'GIS Data', 'gis_lidar': 'LiDAR Scans', 'digital_humanities': 'Digital Humanities',
-            'stats-files': 'Statistical Files', 'nvivo': 'NVivo Projects', 'matlab': 'MATLAB Workspaces',
-            'custom': 'Custom Data'
-        };
-        
-        const sensitivityAdvisories = {
-            'public': '<strong>Public Data:</strong> Suitable for open access. Standard backup procedures are recommended. Ensure no personal or sensitive information is included.',
-            'internal': '<strong>Internal Data:</strong> For use within Lakehead University. Use university-provided storage like OneDrive or network drives. Standard 3-2-1 backup strategy is advised.',
-            'confidential': '<strong>Confidential Data:</strong> Contains sensitive information (e.g., identifiable human participant data). Requires encrypted storage and controlled access. Consult the <a href="#" target="_blank">IT Storage Guide</a> and your <a href="#" target="_blank">DMP</a>. A higher redundancy strategy is recommended.',
-            'restricted': '<strong>Restricted Data:</strong> Highly sensitive data that could cause significant harm if disclosed. Requires the highest level of security. You must consult with IT Security and the <a href="#" target="_blank">Research Ethics Board</a>. Enterprise-level storage and backup are mandatory.'
-        };
+    const costConfig = { activePerTB: 50, archivalPerTB: 20 };
+    let chart;
 
-        let currentMultiplier = 3;
-        let audioDuration = 1.0;
-        let videoDuration = 1.0;
-        let projectDuration = 5;
-        let sensitivityLevel = 'internal';
+    // --- STATE ---
+    let state = {
+        fileSizes: {},
+        inputs: {},
+        durations: { 'audio-duration': 1.0, 'video-duration': 1.0 },
+        multiplier: 3,
+        activeDuration: 3,
+        archivalDuration: 7,
+        sensitivity: 'internal'
+    };
 
-        // --- DOM ELEMENTS ---
-        const allInputs = document.querySelectorAll('input[type="number"], input[type="range"]');
-        const formatBtns = document.querySelectorAll('.format-btn');
-        const multiplierBtns = document.querySelectorAll('.multiplier-btn');
-        const sensitivityBtns = document.querySelectorAll('#sensitivity-selector .planning-btn');
-        const exportBtn = document.getElementById('export-btn');
+    // --- DOM GENERATION ---
+    function generateAccordions() {
+        const container = document.querySelector('.accordion-set');
+        let html = '';
+        for (const [category, config] of Object.entries(fileCategories)) {
+            html += `
+                <div>
+                    <button class="accordion-header" style="border-left-color: ${config.color};">
+                        ${category} <span class="icon">▼</span>
+                    </button>
+                    <div class="accordion-panel">
+                        <div class="accordion-panel-content">
+                            <div class="file-inputs">
+                                ${generateInputs(config.files)}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        container.innerHTML = html;
+    }
 
-        // --- FUNCTIONS ---
-        function formatBytes(mb) {
-            if (mb < 1024) return `${mb.toFixed(1)} MB`;
-            const gb = mb / 1024;
-            if (gb < 1024) return `${gb.toFixed(1)} GB`;
-            const tb = gb / 1024;
-            return `${tb.toFixed(2)} TB`;
+    function generateInputs(files) {
+        let inputsHtml = '';
+        for (const [id, file] of Object.entries(files)) {
+            state.inputs[id] = 0;
+            let tooltipHtml = file.tooltip ? `<span class="tooltip-trigger">(?)<span class="tooltip-text">${file.tooltip}</span></span>` : '';
+            inputsHtml += `<div class="input-group" data-file-id="${id}">`;
+            inputsHtml += `<div class="input-label">${file.label} ${tooltipHtml}</div>`;
+            
+            if (file.type === 'format' || file.type === 'format-duration') {
+                const firstOption = Object.keys(file.options)[0];
+                state.fileSizes[id] = file.options[firstOption];
+                inputsHtml += `<div class="format-options" data-target-id="${id}">`;
+                for (const [name, size] of Object.entries(file.options)) {
+                    inputsHtml += `<button class="format-btn ${name === firstOption ? 'active' : ''}" data-size="${size}">${name}</button>`;
+                }
+                inputsHtml += `</div>`;
+            } else if (file.type !== 'custom') {
+                 state.fileSizes[id] = file.size;
+            }
+
+            if (file.type === 'format-duration') {
+                inputsHtml += `
+                    <div class="duration-control">
+                        <label>Avg Duration</label>
+                        <input type="range" id="${file.durationId}" min="0.25" max="8" step="0.25" value="1">
+                        <div class="duration-display" id="${file.durationId}-display">1.0 hours</div>
+                    </div>
+                `;
+            }
+
+            if (file.type === 'custom') {
+                 inputsHtml += `<div class="input-description">Enter the number of files and average size per file in Megabytes (MB).</div>`;
+                 inputsHtml += `<div class="input-field"><input type="number" id="custom_count" min="0" value="0" placeholder="Number of files"></div>`;
+                 inputsHtml += `<div class="input-field"><input type="number" id="custom_size" min="0" value="100" placeholder="Size in MB per file"></div>`;
+                 state.inputs['custom_count'] = 0;
+                 state.inputs['custom_size'] = 100;
+            } else {
+                 inputsHtml += `<div class="input-field"><input type="number" id="${id}" min="0" value="0" placeholder="Number of ${file.unit || 'files'}"></div>`;
+            }
+            inputsHtml += `</div>`;
+        }
+        return inputsHtml;
+    }
+
+    // --- CALCULATION & DISPLAY ---
+    function calculateAndRender() {
+        let totalMB = 0;
+        let contributions = {};
+
+        for (const category in fileCategories) {
+            contributions[category] = 0;
         }
 
-        function calculateStorage() {
-            let totalMB = 0;
-            let contributions = {};
+        for (const [id, count] of Object.entries(state.inputs)) {
+            if (count > 0 && state.fileSizes[id]) {
+                let sizeMB = count * state.fileSizes[id];
+                const fileDef = findFileDef(id);
 
-            // Calculate from standard inputs
-            Object.keys(fileSizes).forEach(fileType => {
-                if (fileType === 'custom') return;
-                const countEl = document.getElementById(fileType);
-                if (!countEl) return;
-
-                const count = parseFloat(countEl.value) || 0;
-                let sizeMB = count * fileSizes[fileType];
-                
-                if (fileType === 'audio_standard') sizeMB *= audioDuration;
-                if (fileType === 'video') sizeMB *= videoDuration;
+                if (fileDef && fileDef.type === 'format-duration') {
+                    sizeMB *= state.durations[fileDef.durationId];
+                }
                 
                 totalMB += sizeMB;
-                if (sizeMB > 0) contributions[fileType] = sizeMB;
-            });
-
-            // Calculate custom data
-            const customCount = parseFloat(document.getElementById('custom_count').value) || 0;
-            const customSize = parseFloat(document.getElementById('custom_size').value) || 0;
-            const customTotal = customCount * customSize;
-            if (customTotal > 0) {
-                totalMB += customTotal;
-                contributions['custom'] = customTotal;
+                const category = findCategoryForFile(id);
+                if (category) {
+                    contributions[category] += sizeMB;
+                }
             }
+        }
+        
+        // Custom data
+        const customTotal = state.inputs.custom_count * state.inputs.custom_size;
+        if (customTotal > 0) {
+            totalMB += customTotal;
+            contributions["⚙️ Custom Data Type"] += customTotal;
+        }
 
-            const baseGB = totalMB / 1024;
-            const totalGB = baseGB * currentMultiplier;
-            const totalTB = totalGB / 1024;
-            const archivalGB = totalGB * projectDuration * 0.5; // Simple archival model
+        const baseGB = totalMB / 1024;
+        const totalGB = baseGB * state.multiplier;
+        const archivalGB = baseGB * 2; // Simpler 2x multiplier for archival
 
-            // Find largest contributor
-            let largestContributor = 'None';
-            let largestSize = 0;
-            Object.keys(contributions).forEach(fileType => {
-                if (contributions[fileType] > largestSize) {
-                    largestSize = contributions[fileType];
-                    largestContributor = fileLabels[fileType];
+        // Update Display
+        document.getElementById('base-storage').textContent = `${baseGB.toFixed(1)} GB`;
+        document.getElementById('total-storage').textContent = totalGB < 1024 ? `${totalGB.toFixed(1)} GB` : `${(totalGB/1024).toFixed(2)} TB`;
+        document.getElementById('archival-storage').textContent = `${archivalGB.toFixed(1)} GB`;
+        
+        updateTierGauge(totalGB / 1024);
+        updateChart(contributions);
+        updateWarnings(totalGB);
+        updateCost(totalGB, archivalGB);
+    }
+    
+    function updateTierGauge(totalTB) {
+        const fill = document.getElementById('tier-gauge-fill');
+        let heightPercent = 0;
+        if (totalTB <= 1) { // Personal
+            heightPercent = (totalTB / 1) * 30;
+        } else if (totalTB <= 5) { // Departmental
+            heightPercent = 30 + ((totalTB - 1) / 4) * 40;
+        } else { // Enterprise
+            heightPercent = 70 + ((totalTB - 5) / 15) * 30;
+        }
+        fill.style.height = `${Math.min(heightPercent, 100)}%`;
+    }
+
+    function updateChart(contributions) {
+        const ctx = document.getElementById('storage-chart').getContext('2d');
+        const labels = Object.keys(contributions).filter(k => contributions[k] > 0);
+        const data = labels.map(k => (contributions[k] / 1024).toFixed(2));
+        const colors = labels.map(k => fileCategories[k].color);
+
+        if (chart) {
+            chart.data.labels = labels;
+            chart.data.datasets[0].data = data;
+            chart.data.datasets[0].backgroundColor = colors;
+            chart.update();
+        } else {
+            chart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: data,
+                        backgroundColor: colors,
+                        borderColor: '#fff',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { font: { size: 10 } } },
+                        tooltip: { callbacks: { label: (context) => `${context.label}: ${context.raw} GB` } }
+                    }
                 }
             });
-            
-            updateDisplay(baseGB, totalGB, totalTB, archivalGB, largestContributor);
-            updateWarnings(totalGB, totalTB);
         }
-
-        function updateDisplay(baseGB, totalGB, totalTB, archivalGB, largestContributor) {
-            document.getElementById('base-storage').textContent = `${baseGB.toFixed(1)} GB`;
-            document.getElementById('total-storage').textContent = totalGB < 1024 ? `${totalGB.toFixed(1)} GB` : `${totalTB.toFixed(2)} TB`;
-            document.getElementById('total-tb').textContent = `${totalTB.toFixed(2)} TB`;
-            document.getElementById('current-multiplier').textContent = `${currentMultiplier}x`;
-            document.getElementById('largest-contributor').textContent = largestContributor;
-            document.getElementById('archival-storage').textContent = archivalGB < 1024 ? `${archivalGB.toFixed(1)} GB` : `${(archivalGB/1024).toFixed(2)} TB`;
-
-            const progressPercent = Math.min((totalGB / 2000) * 100, 100); // Progress bar relative to 2TB
-            document.getElementById('storage-progress').style.width = `${progressPercent}%`;
+    }
+    
+    function updateWarnings(totalGB) {
+        const warningDiv = document.getElementById('warning-message');
+        const totalTB = totalGB / 1024;
+        if (totalTB > 5) {
+            warningDiv.innerHTML = `<div class="warning-message warning-critical">🚨 MASSIVE SCALE: ${totalTB.toFixed(1)} TB requires enterprise infrastructure and a formal consultation.</div>`;
+        } else if (totalTB > 1) {
+            warningDiv.innerHTML = `<div class="warning-message warning-critical">⚠️ ENTERPRISE TIER: ${totalTB.toFixed(1)} TB requires professional storage solutions.</div>`;
+        } else if (totalGB > 200) {
+            warningDiv.innerHTML = `<div class="warning-message warning-high">💡 SIGNIFICANT STORAGE: ${totalGB.toFixed(0)} GB needs dedicated systems. Ensure your DMP is robust.</div>`;
+        } else {
+            warningDiv.innerHTML = '';
         }
-        
-        function updateWarnings(totalGB, totalTB) {
-            const warningDiv = document.getElementById('warning-message');
-            if (totalTB > 5) {
-                warningDiv.innerHTML = `<div class="warning-message warning-critical">🚨 MASSIVE SCALE: ${totalTB.toFixed(1)} TB requires enterprise infrastructure, dedicated IT support, and significant budget allocation. Please contact IT for a consultation.</div>`;
-            } else if (totalTB > 1) {
-                warningDiv.innerHTML = `<div class="warning-message warning-critical">⚠️ ENTERPRISE TERRITORY: ${totalTB.toFixed(1)} TB requires serious infrastructure planning and professional storage solutions.</div>`;
-            } else if (totalGB > 200) {
-                warningDiv.innerHTML = `<div class="warning-message warning-high">💡 SIGNIFICANT STORAGE: ${totalGB.toFixed(0)} GB needs dedicated storage systems and backup strategies. Ensure your DMP is robust.</div>`;
-            } else {
-                warningDiv.innerHTML = '';
+    }
+    
+    function updateCost(totalGB, archivalGB) {
+        const activeCost = (totalGB / 1024) * costConfig.activePerTB * state.activeDuration;
+        const archivalCost = (archivalGB / 1024) * costConfig.archivalPerTB * state.archivalDuration;
+        document.getElementById('active-cost').textContent = `$${activeCost.toFixed(0)} / ${state.activeDuration} yrs`;
+        document.getElementById('archival-cost').textContent = `$${archivalCost.toFixed(0)} / ${state.archivalDuration} yrs`;
+    }
+
+    // --- EVENT HANDLERS ---
+    function setupEventListeners() {
+        document.querySelector('.accordion-set').addEventListener('click', (e) => {
+            // Accordion toggle
+            if (e.target.classList.contains('accordion-header')) {
+                e.target.classList.toggle('active');
+                const panel = e.target.nextElementSibling;
+                panel.style.maxHeight = panel.style.maxHeight ? null : panel.scrollHeight + 'px';
             }
-        }
-        
-        function handleSensitivityChange(level) {
-            sensitivityLevel = level;
-            const advisoryDiv = document.getElementById('sensitivity-advisory');
-            advisoryDiv.innerHTML = sensitivityAdvisories[level];
-            advisoryDiv.className = level;
-            advisoryDiv.style.display = 'block';
+            // Format buttons
+            if (e.target.classList.contains('format-btn')) {
+                const targetId = e.target.parentElement.dataset.targetId;
+                e.target.parentElement.querySelectorAll('.format-btn').forEach(b => b.classList.remove('active'));
+                e.target.classList.add('active');
+                state.fileSizes[targetId] = parseFloat(e.target.dataset.size);
+                calculateAndRender();
+            }
+        });
 
-            // Suggest multipliers
-            let suggestedMultiplier = 3;
-            if (level === 'confidential') suggestedMultiplier = 4;
-            if (level === 'restricted') suggestedMultiplier = 7;
-            
-            document.querySelectorAll('.multiplier-btn').forEach(btn => {
-                btn.classList.remove('active');
-                if (parseFloat(btn.dataset.multiplier) === suggestedMultiplier) {
-                    btn.classList.add('active');
-                    currentMultiplier = suggestedMultiplier;
+        document.querySelector('.accordion-set').addEventListener('input', (e) => {
+            const id = e.target.id;
+            if (id.includes('-duration')) { // Duration sliders
+                state.durations[id] = parseFloat(e.target.value);
+                document.getElementById(`${id}-display`).textContent = `${state.durations[id].toFixed(1)} hours`;
+            } else { // Number inputs
+                state.inputs[id] = parseFloat(e.target.value) || 0;
+                const fileId = e.target.closest('.input-group').dataset.fileId;
+                if (fileId) {
+                    const header = e.target.closest('.accordion-panel').previousElementSibling;
+                    header.classList.add('glow');
+                    setTimeout(() => header.classList.remove('glow'), 1000);
                 }
-            });
-            calculateStorage();
-        }
-        
-        function exportResults() {
-            const baseGB = document.getElementById('base-storage').textContent;
-            const totalStorage = document.getElementById('total-storage').textContent;
-            const archivalStorage = document.getElementById('archival-storage').textContent;
-            const multiplier = document.getElementById('current-multiplier').textContent;
-
-            let report = `RESEARCH STORAGE ESTIMATION REPORT\n`;
-            report += `Generated: ${new Date().toLocaleString()}\n\n`;
-            report += `--- PROJECT OVERVIEW ---\n`;
-            report += `Data Sensitivity Level: ${sensitivityLevel.charAt(0).toUpperCase() + sensitivityLevel.slice(1)}\n`;
-            report += `Project Duration / Retention: ${projectDuration} years\n`;
-            report += `Collaborators: ${document.getElementById('collaborators').value}\n\n`;
-
-            report += `--- STORAGE SUMMARY ---\n`;
-            report += `Base Data Size: ${baseGB}\n`;
-            report += `Storage Strategy Multiplier: ${multiplier}\n`;
-            report += `TOTAL ACTIVE STORAGE: ${totalStorage}\n`;
-            report += `ESTIMATED LONG-TERM ARCHIVAL: ${archivalStorage}\n\n`;
-            
-            report += `--- FILE BREAKDOWN ---\n`;
-            let hasFiles = false;
-            Object.keys(fileLabels).forEach(id => {
-                 const input = document.getElementById(id);
-                 if (input && parseFloat(input.value) > 0) {
-                     report += `${fileLabels[id]}: ${input.value} files/units\n`;
-                     hasFiles = true;
-                 }
-            });
-             const customCount = parseFloat(document.getElementById('custom_count').value) || 0;
-            if (customCount > 0) {
-                report += `Custom Data: ${customCount} files at ${document.getElementById('custom_size').value} MB/file\n`;
-                hasFiles = true;
             }
-            if (!hasFiles) report += `No files entered.\n`;
+            calculateAndRender();
+        });
 
-            const blob = new Blob([report], { type: 'text/plain' });
-            const a = document.createElement('a');
-            a.href = URL.createObjectURL(blob);
-            a.download = 'Lakehead-Storage-Estimation.txt';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-        }
-
-        // --- EVENT LISTENERS ---
-        allInputs.forEach(input => input.addEventListener('input', calculateStorage));
-        exportBtn.addEventListener('click', exportResults);
-
-        formatBtns.forEach(btn => {
-            btn.addEventListener('click', function() {
-                this.parentElement.querySelectorAll('.format-btn').forEach(b => b.classList.remove('active'));
-                this.classList.add('active');
-                fileSizes[this.dataset.target] = parseFloat(this.dataset.size);
-                calculateStorage();
-            });
+        document.getElementById('multiplier-selector').addEventListener('click', (e) => {
+            const btn = e.target.closest('.multiplier-btn');
+            if (btn) {
+                document.querySelectorAll('.multiplier-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                state.multiplier = parseFloat(btn.dataset.multiplier);
+                calculateAndRender();
+            }
         });
         
-        multiplierBtns.forEach(btn => {
-            btn.addEventListener('click', function() {
-                multiplierBtns.forEach(b => b.classList.remove('active'));
-                this.classList.add('active');
-                currentMultiplier = parseFloat(this.dataset.multiplier);
-                calculateStorage();
-            });
-        });
-        
-        sensitivityBtns.forEach(btn => {
-            btn.addEventListener('click', function() {
-                sensitivityBtns.forEach(b => b.classList.remove('active'));
-                this.classList.add('active');
-                handleSensitivityChange(this.dataset.level);
-            });
-        });
-
-        document.getElementById('audio-duration').addEventListener('input', function() {
-            audioDuration = parseFloat(this.value);
-            document.getElementById('audio-duration-display').textContent = `${audioDuration.toFixed(1)} hours`;
-            calculateStorage();
-        });
-
-        document.getElementById('video-duration').addEventListener('input', function() {
-            videoDuration = parseFloat(this.value);
-            document.getElementById('video-duration-display').textContent = `${videoDuration.toFixed(1)} hours`;
-            calculateStorage();
-        });
-        
-        document.getElementById('project-duration').addEventListener('input', function() {
-            projectDuration = parseInt(this.value);
-            const display = projectDuration === 10 ? '10+ Years' : `${projectDuration} Years`;
-            document.getElementById('project-duration-display').textContent = display;
-            calculateStorage();
-        });
-        
-        document.getElementById('collaborators').addEventListener('input', function() {
-            const num = parseInt(this.value) || 1;
-            const advisory = document.getElementById('collaboration-advisory');
-            if (num > 1) {
-                advisory.textContent = 'Recommendation: Use Lakehead MS Teams or OneDrive for collaborative work and version control.';
-            } else {
-                advisory.textContent = '';
+        document.getElementById('sensitivity-selector').addEventListener('click', (e) => {
+            const btn = e.target.closest('.planning-btn');
+            if (btn) {
+                document.querySelectorAll('#sensitivity-selector .planning-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                state.sensitivity = btn.dataset.level;
+                // Auto-adjust multiplier
+                let suggestedMultiplier = 3;
+                if (state.sensitivity === 'confidential') suggestedMultiplier = 4;
+                if (state.sensitivity === 'restricted') suggestedMultiplier = 7;
+                document.querySelectorAll('.multiplier-btn').forEach(b => {
+                    b.classList.toggle('active', parseFloat(b.dataset.multiplier) === suggestedMultiplier);
+                });
+                state.multiplier = suggestedMultiplier;
+                calculateAndRender();
             }
         });
 
-        // --- INITIALIZATION ---
-        handleSensitivityChange('internal'); // Set initial state
-        calculateStorage();
+        ['active-duration', 'archival-duration'].forEach(id => {
+            document.getElementById(id).addEventListener('input', e => {
+                const value = parseInt(e.target.value);
+                if(id === 'active-duration') state.activeDuration = value;
+                else state.archivalDuration = value;
+                document.getElementById(`${id}-display`).textContent = `${value} Years`;
+                calculateAndRender();
+            });
+        });
+        
+        document.getElementById('cost-toggle-btn').addEventListener('click', () => {
+            const costSection = document.getElementById('cost-section');
+            const isVisible = costSection.style.display === 'block';
+            costSection.style.display = isVisible ? 'none' : 'block';
+        });
+        
+        document.getElementById('consult-btn').addEventListener('click', generateConsultationEmail);
+    }
+    
+    function generateConsultationEmail() {
+        const subject = "Research Data Storage Consultation Request";
+        let body = "Hello Research Data Management Team,\n\nI am planning a new research project and have used the storage calculator to estimate my needs. Please see the summary below.\n\n";
+        body += "--- PROJECT SUMMARY ---\n";
+        body += `Sensitivity Level: ${state.sensitivity}\n`;
+        body += `Active Phase: ${state.activeDuration} years\n`;
+        body += `Archival Phase: ${state.archivalDuration} years\n\n`;
+        body += "--- STORAGE ESTIMATE ---\n";
+        body += `Base Data Size: ${document.getElementById('base-storage').textContent}\n`;
+        body += `Active Storage (with ${state.multiplier}x multiplier): ${document.getElementById('total-storage').textContent}\n`;
+        body += `Long-Term Archival Storage: ${document.getElementById('archival-storage').textContent}\n\n`;
+        body += "--- FILE BREAKDOWN ---\n";
+        for (const [id, count] of Object.entries(state.inputs)) {
+            if (count > 0 && id !== 'custom_size') {
+                const label = findFileDef(id)?.label || id;
+                body += `- ${label}: ${count} units\n`;
+            }
+        }
+        body += "\nI would like to schedule a consultation to discuss appropriate storage solutions.\n\n";
+        body += "Thank you,";
+        
+        window.location.href = `mailto:research.data@lakeheadu.ca?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    }
+
+    // --- UTILITY ---
+    function findFileDef(id) {
+        for (const category of Object.values(fileCategories)) {
+            if (category.files[id]) return category.files[id];
+        }
+        return null;
+    }
+    function findCategoryForFile(id) {
+        for (const [name, category] of Object.entries(fileCategories)) {
+            if (category.files[id]) return name;
+        }
+        return null;
+    }
+
+    // --- INITIALIZATION ---
+    document.addEventListener('DOMContentLoaded', () => {
+        generateAccordions();
+        setupEventListeners();
+        calculateAndRender();
+    });
     </script>
 </body>
 </html>
