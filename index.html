@@ -75,13 +75,9 @@
         .tooltip-trigger .tooltip-text { visibility: hidden; width: 220px; background-color: var(--text-dark); color: #fff; text-align: center; border-radius: 6px; padding: 10px; position: absolute; z-index: 10; bottom: 130%; left: 50%; margin-left: -110px; opacity: 0; transition: opacity 0.3s; font-size: 0.85em; font-weight: 400; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
         .tooltip-trigger:hover .tooltip-text { visibility: visible; opacity: 1; }
 
-        /* Chart & Gauge Styles */
-        .results-visuals { display: flex; gap: 20px; margin-top: 20px; align-items: flex-start; }
-        #chart-container { flex: 1; min-width: 0; }
-        #tier-gauge-container { width: 40px; text-align: center; }
-        #tier-gauge-container h4 { font-size: 0.9em; color: var(--text-dark); margin-bottom: 10px; }
-        .tier-gauge { position: relative; width: 30px; height: 200px; background: var(--border-color); border-radius: 15px; margin: 0 auto; }
-        .tier-gauge-fill { position: absolute; bottom: 0; width: 100%; background: linear-gradient(to top, var(--lu-yellow), var(--lu-red)); border-radius: 15px; transition: height 0.5s ease-out; }
+        /* Chart Styles */
+        .results-visuals { display: flex; justify-content: center; margin-top: 20px; }
+        #chart-container { max-width: 250px; margin: 0 auto; }
         
         /* Enhanced Button Selection */
         .format-options { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 8px; margin-top: 10px; }
@@ -167,12 +163,6 @@
                 <div class="results-visuals">
                     <div id="chart-container">
                         <canvas id="storage-chart"></canvas>
-                    </div>
-                    <div id="tier-gauge-container">
-                        <h4>Storage Tier</h4>
-                        <div class="tier-gauge">
-                            <div id="tier-gauge-fill" class="tier-gauge-fill"></div>
-                        </div>
                     </div>
                 </div>
 
@@ -381,24 +371,10 @@
         const strategyName = activeBtn ? activeBtn.querySelector('.main-text').textContent : 'N/A';
         document.getElementById('storage-strategy').textContent = `${state.multiplier}x (${strategyName})`;
 
-        updateTierGauge(totalGB / 1024);
         updateChart(contributions);
         updateWarnings(totalGB);
     }
     
-    function updateTierGauge(totalTB) {
-        const fill = document.getElementById('tier-gauge-fill');
-        let heightPercent = 0;
-        if (totalTB <= 1) { // Personal
-            heightPercent = (totalTB / 1) * 30;
-        } else if (totalTB <= 5) { // Departmental
-            heightPercent = 30 + ((totalTB - 1) / 4) * 40;
-        } else { // Enterprise
-            heightPercent = 70 + ((totalTB - 5) / 15) * 30;
-        }
-        fill.style.height = `${Math.min(heightPercent, 100)}%`;
-    }
-
     function updateChart(contributions) {
         const ctx = document.getElementById('storage-chart').getContext('2d');
         const labels = Object.keys(contributions).filter(k => contributions[k] > 0);
